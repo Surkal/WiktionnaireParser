@@ -1,11 +1,15 @@
 import setuptools
 
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt') as f:
+    install_requires = f.read().strip().split('\n')
+
 setuptools.setup(
     name="wiktionnaireparser", # Replace with your own username
-    version="0.0.1",
+    version="0.0.2",
     author="Surkal",
     description="A library for parsing the french wiktionnary",
     long_description=long_description,
@@ -20,4 +24,5 @@ setuptools.setup(
         "Natural Language :: English",
     ],
     python_requires='>=3.6',
+    install_requires=install_requires,
 )
