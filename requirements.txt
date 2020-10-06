@@ -1,0 +1,3 @@
+pytest==6.1.1
+wikitextparser==0.45.2
+coverage==5.3
