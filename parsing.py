@@ -1,5 +1,4 @@
 import re
-import json
 
 import requests
 import wikitextparser as wtp
@@ -38,9 +37,8 @@ class Page:
     @classmethod
     def from_api(cls, title):
         query = API_QUERY + title
-        response = requests.get(query)
-        js = json.loads(response.text)
-        wikitext = js['parse']['wikitext']['*']
+        response = requests.get(query).json()
+        wikitext = response['parse']['wikitext']['*']
         return cls(wikitext)
 
 
@@ -67,9 +65,6 @@ class _LanguageSection(Page):
         for s in self.section.sections:
             if re.match(regex, s.string):
                 return s.sections[1]
-
-    def extract_sources(self):
-        pass
 
     def __repr__(self):
         return "%s %s" % (self.__class__.__name__, self.lang)
