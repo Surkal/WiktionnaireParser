@@ -1,8 +1,14 @@
 import re
+import json
 
+import requests
 import wikitextparser as wtp
 
 from utils import get_languages
+
+
+API_QUERY = "https://fr.wiktionary.org/w/api.php?\
+             action=parse&prop=wikitext&format=json&page="
 
 
 class Page:
@@ -20,6 +26,22 @@ class Page:
     def _language_sections(self):
         for lang in self.langs:
             _LanguageSection(self.wikitext, self.parsed, lang)
+
+    def get_etymology(self, lang=None):
+        if lang:
+            for section in self.all_sections:
+                if section.lang == lang and section.etymology:
+                    return section.etymology.contents
+            return
+        return [section.etymology.contents for section in self.all_sections]
+
+    @classmethod
+    def from_api(cls, title):
+        query = API_QUERY + title
+        response = requests.get(query)
+        js = json.loads(response.text)
+        wikitext = js['parse']['wikitext']['*']
+        return cls(wikitext)
 
 
 class _LanguageSection(Page):
@@ -41,10 +63,10 @@ class _LanguageSection(Page):
 
     def extract_etymology(self):
         regex = r"=* *\{\{S\|étymologie\}\} *=*\n*"
-        #TODO: DRY
+        # TODO: DRY
         for s in self.section.sections:
             if re.match(regex, s.string):
-                return re.sub(regex, "", s.sections[1].string)
+                return s.sections[1]
 
     def extract_sources(self):
         pass
@@ -53,7 +75,7 @@ class _LanguageSection(Page):
         return "%s %s" % (self.__class__.__name__, self.lang)
 
 
-class LexicalCategory:
+class _PartOfSpeech(_LanguageSection):
     pass
 
 
