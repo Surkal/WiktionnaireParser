@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 import requests
 from _pytest.monkeypatch import MonkeyPatch
@@ -20,36 +22,78 @@ class TestParsing:
         cls.page = Page(wikitext)
         cls.monkeypatch = MonkeyPatch()
 
+    def test_get_languages(self):
+        langs = self.page.get_languages
+        assert len(langs) == 2
+        assert "fr" in langs
+        assert "en" in langs
+        assert "it" not in langs
+
     @pytest.mark.parametrize(
-        "lang,i,text_length",
-        [('fr', 0, 5092),
-        ('en', 1, 281)]
+        "lang,size",
+        [('fr', 5072),
+        ('en', 261)]
     )
-    def test_get_language_section_text_length(self, lang, i, text_length):
-        assert len(self.page.all_sections[i].section) == text_length
+    def test_get_language_section_text_length(self, lang, size):
+        assert len(self.page.get_language(lang)) == size
 
     @pytest.mark.parametrize(
         "lang,etymology,typ",
         [("fr", ": Du {{étyl|la|fr|mot=implico|dif=implicāre|sens=impliquer}}.\n\n", str),
         ("en", ": {{composé de|m=1|employ|-er|lang=en}}.\n\n", str),
         ("it", None, type(None)),
-        (None, [": Du {{étyl|la|fr|mot=implico|dif=implicāre|sens=impliquer}}.\n\n", ": {{composé de|m=1|employ|-er|lang=en}}.\n\n"], list),]
+        #(None, [": Du {{étyl|la|fr|mot=implico|dif=implicāre|sens=impliquer}}.\n\n", ": {{composé de|m=1|employ|-er|lang=en}}.\n\n"], list),
+        ]
     )
     def test_get_etymology(self, lang, etymology, typ):
-        result = self.page.get_etymology(lang=lang)
+        result = self.page.get_etymology(lang)
         assert result == etymology
         assert isinstance(result, typ)
-
-    def test_language_sections(self):
-        assert len(self.page.all_sections) == 2
-        assert str(self.page.all_sections[0]) == "_LanguageSection fr"
-        assert str(self.page.all_sections[1]) == "_LanguageSection en"
 
     def test_query_from_api(self):
         def mock_get(*args, **kwargs):
             return MockResponse()
 
         self.monkeypatch.setattr(requests, "get", mock_get)
-
         page = Page.from_api("")
-        assert page.get_etymology(lang="en") == ": {{composé de|m=1|employ|-er|lang=en}}.\n\n"
+        assert page.get_etymology(language_code="en") == ": {{composé de|m=1|employ|-er|lang=en}}.\n\n"
+
+    @pytest.mark.parametrize(
+        "lang,part_of_speech,size,is_inflected,num",
+        [
+            ("fr", "verbe", 4717, False, 1),
+            ("en", "nom", 132, False, 1),
+        ]
+    )
+    def test_part_of_speech(self, lang, part_of_speech, size, is_inflected, num):
+        parts_of_speech = self.page.get_parts_of_speech(lang, part_of_speech)
+        assert len(parts_of_speech) == 1
+        part_of_speech = parts_of_speech[0]
+        assert len(part_of_speech.part_of_speech_section.contents) == size
+        assert part_of_speech.is_inflected == is_inflected
+        assert part_of_speech.num == num
+
+    @pytest.mark.parametrize(
+        "lang,word_class,name",
+        [
+            ("fr", "verbe", "fr-verbe-1"),
+            ("en", "nom", "en-nom-1"),
+        ]
+    )
+    def test_part_of_speech_class_name(self, lang, word_class, name):
+        assert str(self.page.get_parts_of_speech(lang, word_class)[0]) == name
+
+class TestPartOfSpeech:
+    @classmethod
+    def setup_class(cls):
+        with open("tests/pêche.txt", "r") as f:
+            text = f.read()
+        cls.page = Page(text)
+
+    def test_parts_of_speech(self):
+        parts = self.page.get_parts_of_speech("fr", "nom")
+        assert str(parts[2]) == "fr-nom-3"
+        assert len(parts) == 3
+        assert all(list(not x.is_inflected for x in parts))
+        assert self.page.get_parts_of_speech("fr", "verbe")[0].is_inflected
+        assert len(self.page.get_parts_of_speech("fr")) == 5
