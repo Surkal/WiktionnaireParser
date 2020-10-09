@@ -1,5 +1,5 @@
 test:
-	PYTHONPATH=. pytest
+	python -m pytest
 
 coverage:
-	PYTHONPATH=. coverage run -m pytest
+	python -m coverage run -m pytest
