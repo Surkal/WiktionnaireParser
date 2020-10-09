@@ -1,6 +1,6 @@
 import pytest
 
-from ..utils import get_languages, remove_sortkey
+from wiktionnaireparser.utils import get_languages, remove_sortkey
 
 @pytest.mark.parametrize(
     "langs",
