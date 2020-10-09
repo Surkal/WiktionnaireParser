@@ -7,7 +7,7 @@ A library for parsing the [french wiktionary](https://fr.wiktionary.org).
 
 Supported Python versions : 3.6+
 
-### From Pip
+### With Pip
 
 `pip install wiktionnaireparser`
 
@@ -19,5 +19,18 @@ Supported Python versions : 3.6+
 ## Usage
 
 ```python
-from wiktionnaireparser.parsing import Page
+>>> from wiktionnaireparser import WiktionnaireParser as wiktp
+>>> page = wiktp.from_source('nage PMT')
+>>> page.get_etymology()
+'Forme abrégée de nage avec palmes, masque et tuba.'
+>>> page.get_parts_of_speech()
+{'Locution nominale': ['(Plongée) Nage avec palmes, masque et tuba.']}
+```
+
+It is also possible to pick a word at random.
+
+```python
+>>> page.random_page()
+>>> page.get_title()
+'décrocher'
 ```

@@ -15,8 +15,14 @@ class WiktionnaireParser:
     @classmethod
     def from_source(cls, title, *args, **kwargs):
         url = 'https://fr.wiktionary.org/wiki/%s' % title
-        response = requests.get(url).content
-        return cls(response, *args, **kwargs)
+        response = requests.get(url)
+        return cls(response.content, *args, **kwargs)
+
+    @classmethod
+    def random_page(cls):
+        url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=fr'
+        response = requests.get(url)
+        return cls(response.content)
 
     @property
     def language(self):
@@ -30,7 +36,8 @@ class WiktionnaireParser:
     @property
     def get_word_data(self):
         return {
-            'etymologies': self.get_etymology(),
+            'title'       : self.get_title(),
+            'etymologies' : self.get_etymology(),
             'partOfSpeech': self.get_parts_of_speech(),
         }
 
@@ -57,8 +64,6 @@ class WiktionnaireParser:
         return self.sections_id
 
     def _filter_sections_id(self, sections, useless_sections):
-        print(sections)
-        print(useless_sections)
         filtered_sections = []
         for sections_ in sections:
             if any(re.search(x, sections_) for x in useless_sections):
@@ -74,6 +79,9 @@ class WiktionnaireParser:
         for key, value in replacements.items():
             section_name = section_name.replace(key, value)
         return section_name
+
+    def get_title(self):
+        return self._query.find('h1').text()
 
     def get_parts_of_speech(self):
         parts_of_speech = {}
@@ -92,12 +100,13 @@ class WiktionnaireParser:
         for definition in text.getchildren():
             raw = definition.text_content()
             examples = ''
-            with suppress(AttributeError):
-                examples = definition.find('ul').find('li').text_content()
-            definitions.append(raw.replace(examples, '').strip())
+            #with suppress(AttributeError):
+                #examples = definition.find('ul').find('li').text_content()
+            definitions.append(raw.split('\n')[0])
         return definitions
 
     def get_etymology(self):
+        # TODO: supprimer '(Siècle à préciser) ' exemple : chalon
         ignore_etym = 'Étymologie manquante ou incomplète. Si vous la '\
                       'connaissez, vous pouvez l’ajouter en cliquant ici.'
         id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id))
