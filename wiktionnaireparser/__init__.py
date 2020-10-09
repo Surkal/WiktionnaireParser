@@ -1,1 +1,1 @@
-from .parsing import Page
+from .parsing import Page, PartOfSpeech
