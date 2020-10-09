@@ -2,3 +2,4 @@ pytest==6.1.1
 wikitextparser==0.45.2
 coverage==5.3
 requests==2.24.0
+pyquery==1.4.1
