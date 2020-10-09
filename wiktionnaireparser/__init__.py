@@ -1,1 +1,1 @@
-from .parsing import Page, PartOfSpeech
+from .wikitext import Page, PartOfSpeech
