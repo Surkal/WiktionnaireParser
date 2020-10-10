@@ -1,6 +1,9 @@
 import pytest
 
-from wiktionnaireparser.utils import get_languages, remove_sortkey
+from wiktionnaireparser.utils import (
+    get_languages, remove_sortkey, etymology_cleaner, beautify_section_name,
+    filter_sections_id,
+)
 
 @pytest.mark.parametrize(
     "langs",
@@ -25,3 +28,34 @@ def test_get_languages(langs):
 )
 def test_remove_sortkey(input, output):
     assert remove_sortkey(input) == output
+
+@pytest.mark.parametrize(
+    "input,output",
+    [
+        ('(Siècle à préciser) Composé de maitresse, de et conférence.', 'Composé de maitresse, de et conférence.'),
+        ('Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', ''),
+        ('(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', '(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.')
+    ]
+)
+def test_etymology_cleaner(input, output):
+    assert etymology_cleaner(input) == output
+
+@pytest.mark.parametrize(
+    'raw,clean',
+    [
+        ('Verbe_1', 'Verbe'),
+        ('Verbe_2_2', 'Verbe 2'),
+        ('Verbe_2', 'Verbe 2'),
+        ('Nom_commun_1', 'Nom commun'),
+        ('Nom_commun_2_2', 'Nom commun 2'),
+    ]
+)
+def test_beautify_section_name(raw, clean):
+    assert beautify_section_name(raw) == clean
+
+def test_filter_sections_id():
+    sections = ['#Étymologie_10', '#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2', '#Prononciation']
+    useless = (
+        r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
+    )
+    assert filter_sections_id(sections, useless) == ['#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2']

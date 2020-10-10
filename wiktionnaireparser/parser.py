@@ -4,19 +4,22 @@ import re
 import requests
 from pyquery import PyQuery as pq
 
+from .utils import beautify_section_name, etymology_cleaner, filter_sections_id
+
 
 class WiktionnaireParser:
     """
     Main class to analyze the HTML code of a wiktionary page.
     """
-    def __init__(self, html, *args, **kwargs):
+    def __init__(self, html, language='Français'):
         self.html = html
         self._query = pq(html)
-        self._language = kwargs.get('language') or 'Français'
+        self._language = language
+        self.sections_id = []
         self._find_lang_sections_id()
 
     @classmethod
-    def from_source(cls, title, oldid=None, *args, **kwargs):
+    def from_source(cls, title, language='Français', oldid=None):
         """
         Get a page by its title.
         Possibly an old version of the title you are looking for
@@ -27,14 +30,15 @@ class WiktionnaireParser:
         else:
             url = 'https://fr.wiktionary.org/wiki/%s' % title
         response = requests.get(url)
-        return cls(response.content, *args, **kwargs)
+        return cls(response.content, language)
 
     @classmethod
-    def random_page(cls):
+    def random_page(cls, language='Français'):
         """Get a random page."""
+        # TODO: make it available for more languages
         url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=fr'
         response = requests.get(url)
-        return cls(response.content)
+        return cls(response.content, language)
 
     @property
     def language(self):
@@ -42,8 +46,8 @@ class WiktionnaireParser:
         return self._language
 
     @language.setter
-    def language(self, x):
-        self._language = x
+    def language(self, language):
+        self._language = language
         self._find_lang_sections_id()
 
     @property
@@ -81,7 +85,6 @@ class WiktionnaireParser:
         return self.sections_id
 
     def _find_sections_id_without_summary(self):
-        self.sections_id = []
         if self._query.find('#Étymologie'):
             self.sections_id.append('#Étymologie')
         section_id = self._query.find('.titredef')[0].getparent().attrib['id']
@@ -89,23 +92,6 @@ class WiktionnaireParser:
             self.sections_id.append('#' + section_id)
 
         return self.sections_id
-
-    def _filter_sections_id(self, sections, useless_sections):
-        filtered_sections = []
-        for sections_ in sections:
-            if any(re.search(x, sections_) for x in useless_sections):
-                continue
-            filtered_sections.append(sections_)
-        return filtered_sections
-
-    def _beautify_section_name(self, section_name):
-        replacements = {'#': '', '_': ' '}
-        # TODO: to try in one line
-        section_name = re.sub(r'(_\d*)_\d*$', '\g<1>', section_name)
-        section_name = re.sub(r'_1$', '', section_name)
-        for key, value in replacements.items():
-            section_name = section_name.replace(key, value)
-        return section_name
 
     def get_title(self):
         """Get the current page title."""
@@ -117,9 +103,9 @@ class WiktionnaireParser:
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
         )
 
-        sections = self._filter_sections_id(self.sections_id, useless_sections)
+        sections = filter_sections_id(self.sections_id, useless_sections)
         for section_name in sections:
-            nice_section_name = self._beautify_section_name(section_name)
+            nice_section_name = beautify_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
         return parts_of_speech
 
@@ -132,25 +118,11 @@ class WiktionnaireParser:
             text = text.getnext()
         for definition in text.getchildren():
             raw = definition.text_content()
-            examples = ''
+            #examples = ''
             #with suppress(AttributeError):
                 #examples = definition.find('ul').find('li').text_content()
             definitions.append(raw.split('\n')[0])
         return definitions
-
-    def _etymology_cleaner(self, etymology):
-        """
-        Cleans up the etymology of the text prompting
-        site visitors to contribute.
-        """
-        ignore_etym =   [
-                            r'^Étymologie manquante ou incomplète. Si vous la '\
-                            'connaissez, vous pouvez l’ajouter en cliquant ici\.$',
-                            r'\(Siècle à préciser\) ',
-                        ]
-        for ignore in ignore_etym:
-            etymology = re.sub(ignore, '', etymology)
-        return etymology
 
     def get_etymology(self):
         """
@@ -165,6 +137,6 @@ class WiktionnaireParser:
         id_ = id_[0]
 
         etym = self._query.find(id_)[0].getparent().getnext().text_content()
-        etym = self._etymology_cleaner(etym)
+        etym = etymology_cleaner(etym)
 
         return etym

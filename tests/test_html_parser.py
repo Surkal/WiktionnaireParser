@@ -22,24 +22,6 @@ class TestWiktionnaireParser:
         assert self.page.language == 'Français'
 
     @pytest.mark.parametrize(
-        'raw,clean',
-        [
-            ('Verbe_1', 'Verbe'),
-            ('Verbe_2_2', 'Verbe 2'),
-            ('Verbe_2', 'Verbe 2'),
-            ('Nom_commun_1', 'Nom commun'),
-            ('Nom_commun_2_2', 'Nom commun 2'),
-        ]
-    )
-    def test_beautify_section_name(self, raw, clean):
-        assert self.page._beautify_section_name(raw) == clean
-
-    def test_filter_sections_id(self):
-        sections = ['#Étymologie_10', '#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2', '#Prononciation']
-        useless  = ('Étymologie', 'Prononciation', 'Références')
-        assert self.page._filter_sections_id(sections, useless) == ['#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2']
-
-    @pytest.mark.parametrize(
         'language,etymology',
         [
             ('Français', 'De l’espagnol vara.'),
@@ -67,17 +49,6 @@ class TestWiktionnaireParser:
     def test_get_word_data(self):
         assert self.page.get_word_data['etymologies'] == self.page.get_etymology()
 
-    @pytest.mark.parametrize(
-        "input,output",
-        [
-            ('(Siècle à préciser) Composé de maitresse, de et conférence.', 'Composé de maitresse, de et conférence.'),
-            ('Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', ''),
-            ('(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', '(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.')
-        ]
-    )
-    def test_etymology_cleaner(self, input, output):
-        assert self.page._etymology_cleaner(input) == output
-
 
 class TestHTMLFromSource:
     @pytest.mark.parametrize(
@@ -88,7 +59,7 @@ class TestHTMLFromSource:
         ]
     )
     def test_get_definition(self, title, oldid, part_of_speech, definitions):
-        page = WiktionnaireParser.from_source(title, oldid)
+        page = WiktionnaireParser.from_source(title, oldid=oldid)
         data = page.get_parts_of_speech()
         assert data[part_of_speech] == definitions
 
