@@ -5,7 +5,6 @@ from unittest.mock import patch
 from wiktionnaireparser import WiktionnaireParser
 
 
-
 class TestWiktionnaireParser:
     @classmethod
     def setup_class(cls):
@@ -68,15 +67,30 @@ class TestWiktionnaireParser:
     def test_get_word_data(self):
         assert self.page.get_word_data['etymologies'] == self.page.get_etymology()
 
+    @pytest.mark.parametrize(
+        "input,output",
+        [
+            ('(Siècle à préciser) Composé de maitresse, de et conférence.', 'Composé de maitresse, de et conférence.'),
+            ('Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', ''),
+            ('(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', '(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.')
+        ]
+    )
+    def test_etymology_cleaner(self, input, output):
+        assert self.page._etymology_cleaner(input) == output
+
 
 class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', ['Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'])
+            ('vafsi', 28592326, 'Nom commun', ['Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.']),
+            ('maitresse de conférence', 28023166, 'Locution nominale', ['Variante orthographique de maitresse de conférences.']),
         ]
     )
     def test_get_definition(self, title, oldid, part_of_speech, definitions):
         page = WiktionnaireParser.from_source(title, oldid)
         data = page.get_parts_of_speech()
         assert data[part_of_speech] == definitions
+
+    def test_random_page(self):
+        assert WiktionnaireParser.random_page().get_title()

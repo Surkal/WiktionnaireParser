@@ -45,8 +45,11 @@ class WiktionnaireParser:
         }
 
     def _find_lang_sections_id(self):
-        # TODO: returns None when there is no summary
         lang = None
+        # No summary?
+        if not self._query.find('.toc'):
+            return self._find_sections_id_without_summary()
+
         # Find in summary
         for link in self._query.find('a'):
             try:
@@ -63,6 +66,16 @@ class WiktionnaireParser:
         self.sections_id = []
         for section in lang.getnext().getchildren():
             self.sections_id.append(section.find('a').attrib['href'])
+
+        return self.sections_id
+
+    def _find_sections_id_without_summary(self):
+        self.sections_id = []
+        if self._query.find('#Étymologie'):
+            self.sections_id.append('#Étymologie')
+        section_id = self._query.find('.titredef')[0].getparent().attrib['id']
+        if section_id:
+            self.sections_id.append('#' + section_id)
 
         return self.sections_id
 
@@ -112,10 +125,17 @@ class WiktionnaireParser:
             definitions.append(raw.split('\n')[0])
         return definitions
 
+    def _etymology_cleaner(self, etymology):
+        ignore_etym =   [
+                            r'^Étymologie manquante ou incomplète. Si vous la '\
+                            'connaissez, vous pouvez l’ajouter en cliquant ici\.$',
+                            r'\(Siècle à préciser\) ',
+                        ]
+        for ignore in ignore_etym:
+            etymology = re.sub(ignore, '', etymology)
+        return etymology
+
     def get_etymology(self):
-        # TODO: supprimer '(Siècle à préciser) ' exemple : chalon
-        ignore_etym = 'Étymologie manquante ou incomplète. Si vous la '\
-                      'connaissez, vous pouvez l’ajouter en cliquant ici.'
         id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id))
 
         # If there is no etymology section, give up
@@ -124,6 +144,6 @@ class WiktionnaireParser:
         id_ = id_[0]
 
         etym = self._query.find(id_)[0].getparent().getnext().text_content()
-        if etym == ignore_etym:
-            return ''
+        etym = self._etymology_cleaner(etym)
+
         return etym
