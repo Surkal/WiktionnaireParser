@@ -9,7 +9,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="wiktionnaireparser", # Replace with your own username
-    version="0.0.2",
+    version="0.0.3",
     author="Surkal",
     description="A library for parsing the french wiktionnary",
     long_description=long_description,
