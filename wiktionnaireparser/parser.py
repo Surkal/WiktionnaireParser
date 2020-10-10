@@ -6,6 +6,9 @@ from pyquery import PyQuery as pq
 
 
 class WiktionnaireParser:
+    """
+    Main class to analyze the HTML code of a wiktionary page.
+    """
     def __init__(self, html, *args, **kwargs):
         self.html = html
         self._query = pq(html)
@@ -14,6 +17,11 @@ class WiktionnaireParser:
 
     @classmethod
     def from_source(cls, title, oldid=None, *args, **kwargs):
+        """
+        Get a page by its title.
+        Possibly an old version of the title you are looking for
+        by entering its `oldid`.
+        """
         if oldid:
             url = 'https://fr.wiktionary.org/w/index.php?title=%s&oldid=%s' % (title, str(oldid))
         else:
@@ -23,12 +31,14 @@ class WiktionnaireParser:
 
     @classmethod
     def random_page(cls):
+        """Get a random page."""
         url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=fr'
         response = requests.get(url)
         return cls(response.content)
 
     @property
     def language(self):
+        """The searched language."""
         return self._language
 
     @language.setter
@@ -38,6 +48,7 @@ class WiktionnaireParser:
 
     @property
     def get_word_data(self):
+        """Returns a dictionary of all collected data."""
         return {
             'title'       : self.get_title(),
             'etymologies' : self.get_etymology(),
@@ -97,6 +108,7 @@ class WiktionnaireParser:
         return section_name
 
     def get_title(self):
+        """Get the current page title."""
         return self._query.find('h1').text()
 
     def get_parts_of_speech(self):
@@ -112,6 +124,7 @@ class WiktionnaireParser:
         return parts_of_speech
 
     def get_definitions(self, part_of_speech):
+        """Get the definitions of the word."""
         definitions = []
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
@@ -126,6 +139,10 @@ class WiktionnaireParser:
         return definitions
 
     def _etymology_cleaner(self, etymology):
+        """
+        Cleans up the etymology of the text prompting
+        site visitors to contribute.
+        """
         ignore_etym =   [
                             r'^Étymologie manquante ou incomplète. Si vous la '\
                             'connaissez, vous pouvez l’ajouter en cliquant ici\.$',
@@ -136,6 +153,10 @@ class WiktionnaireParser:
         return etymology
 
     def get_etymology(self):
+        """
+        Get the etymology of the word. On the French wiktionary,
+        there is only one 'etymology' section per language.
+        """
         id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id))
 
         # If there is no etymology section, give up
