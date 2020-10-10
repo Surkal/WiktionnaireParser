@@ -9,7 +9,7 @@ from wiktionnaireparser import WiktionnaireParser
 class TestWiktionnaireParser:
     @classmethod
     def setup_class(cls):
-        with open('tests/vara.html', 'r') as f:
+        with open('tests/vara.txt', 'r') as f:
             html = f.read()
         cls.page = WiktionnaireParser(html)
 
@@ -67,3 +67,16 @@ class TestWiktionnaireParser:
 
     def test_get_word_data(self):
         assert self.page.get_word_data['etymologies'] == self.page.get_etymology()
+
+
+class TestHTMLFromSource:
+    @pytest.mark.parametrize(
+        'title,oldid,part_of_speech,definitions',
+        [
+            ('vafsi', 28592326, 'Nom commun', ['Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'])
+        ]
+    )
+    def test_get_definition(self, title, oldid, part_of_speech, definitions):
+        page = WiktionnaireParser.from_source(title, oldid)
+        data = page.get_parts_of_speech()
+        assert data[part_of_speech] == definitions

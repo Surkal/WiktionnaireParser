@@ -1,5 +1,5 @@
 import re
-from contextlib import suppress
+#from contextlib import suppress
 
 import requests
 from pyquery import PyQuery as pq
@@ -13,8 +13,11 @@ class WiktionnaireParser:
         self._find_lang_sections_id()
 
     @classmethod
-    def from_source(cls, title, *args, **kwargs):
-        url = 'https://fr.wiktionary.org/wiki/%s' % title
+    def from_source(cls, title, oldid=None, *args, **kwargs):
+        if oldid:
+            url = 'https://fr.wiktionary.org/w/index.php?title=%s&oldid=%s' % (title, str(oldid))
+        else:
+            url = 'https://fr.wiktionary.org/wiki/%s' % title
         response = requests.get(url)
         return cls(response.content, *args, **kwargs)
 
@@ -85,7 +88,10 @@ class WiktionnaireParser:
 
     def get_parts_of_speech(self):
         parts_of_speech = {}
-        useless_sections = (r'Étymologie', r'Prononciation', r'Références')
+        useless_sections = (
+            r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
+        )
+
         sections = self._filter_sections_id(self.sections_id, useless_sections)
         for section_name in sections:
             nice_section_name = self._beautify_section_name(section_name)
@@ -94,7 +100,8 @@ class WiktionnaireParser:
 
     def get_definitions(self, part_of_speech):
         definitions = []
-        text = self._query.find(part_of_speech)[0].getparent()
+        text = self._query.find(part_of_speech)[0]
+        text = text.getparent()
         while text.tag != 'ol':
             text = text.getnext()
         for definition in text.getchildren():
