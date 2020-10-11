@@ -65,3 +65,9 @@ class TestHTMLFromSource:
 
     def test_random_page(self):
         assert WiktionnaireParser.random_page().get_title()
+
+    def test_subsections(self):
+        page = WiktionnaireParser.from_source('comète', oldid=28407934)
+        assert len(page.sections_id) == 6
+        assert len(page.sections_id['#Nom_commun']) == 9
+        assert '#Synonymes' in page.sections_id['#Nom_commun']

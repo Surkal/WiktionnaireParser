@@ -15,7 +15,7 @@ class WiktionnaireParser:
         self.html = html
         self._query = pq(html)
         self._language = language
-        self.sections_id = []
+        self.sections_id = {}
         self._find_lang_sections_id()
 
     @classmethod
@@ -78,18 +78,26 @@ class WiktionnaireParser:
         if lang is None:
             return None
 
-        self.sections_id = []
-        for section in lang.getnext().getchildren():
-            self.sections_id.append(section.find('a').attrib['href'])
+        self.sections_id = {}
+        for section in lang.getnext().getchildren():  # 'li'
+            section_id = section.find('a').attrib['href']
+            # Subsections?
+            if section.find('ul') is None:
+                self.sections_id[section_id] = []
+                continue
+            subsections = []
+            for subsection in section.find('ul'):
+                subsections.append(subsection.find('a').attrib['href'])
+            self.sections_id[section_id] = subsections
 
         return self.sections_id
 
     def _find_sections_id_without_summary(self):
         if self._query.find('#Étymologie'):
-            self.sections_id.append('#Étymologie')
+            self.sections_id['#Étymologie'] = []
         section_id = self._query.find('.titredef')[0].getparent().attrib['id']
         if section_id:
-            self.sections_id.append('#' + section_id)
+            self.sections_id['#' + section_id] = []
 
         return self.sections_id
 
@@ -109,7 +117,7 @@ class WiktionnaireParser:
             r'Anagrammes',
         )
 
-        sections = filter_sections_id(self.sections_id, useless_sections)
+        sections = filter_sections_id(self.sections_id.keys(), useless_sections)
         for section_name in sections:
             nice_section_name = self._real_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
@@ -174,7 +182,7 @@ class WiktionnaireParser:
         Get the etymology of the word. On the French wiktionary,
         there is only one 'etymology' section per language.
         """
-        id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id))
+        id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id.keys()))
 
         # If there is no etymology section, give up
         if not id_:
@@ -185,3 +193,27 @@ class WiktionnaireParser:
         etym = etymology_cleaner(etym)
 
         return etym
+
+    def get_related_words(self, related_word):
+        """
+        Get related words. Doesn't work for translations.
+        Possible parameters: Apparentés étymologiques, Dérivés, Synonymes,
+            Dérivés dans d’autres langues, Traductions, Hyponymes, Hyperonymes,
+            Variantes orthographiques, Abréviations, Homophones, Méronymes,
+            Vocabulaire apparenté par le sens, etc.
+        """
+        related_word = related_word.replace(' ', '_')
+        regex = r'#%s(?:_\d+)?' % related_word
+        ids = {}
+        for key, values in self.sections_id.items():
+            for value in values:
+                if re.match(regex, value):
+                    ids[key] = value
+        related_words = {}
+        for key, value in ids.items():
+            related = []
+            section = self._query.find(value)[0]
+            for s in section.getparent().getnext():
+                related.append(s.text_content())
+            related_words[key] = related
+        return related_words
