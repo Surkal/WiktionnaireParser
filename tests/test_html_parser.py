@@ -39,10 +39,10 @@ class TestWiktionnaireParser:
     def test_get_parts_of_speech(self):
         self.page.language = 'Suédois'
         result = {
-            'Nom commun': ['Denrée, marchandise, produit.'],
-            'Nom commun 2': ['(Philosophie) Être, existence.'],
-            'Verbe': ['Être.'],
-            'Verbe 2': ['Durer.', 'Suppurer.']
+            'Nom commun 1': {0: {'definition': 'Denrée, marchandise, produit.'}},
+            'Nom commun 2': {0: {'definition': '(Philosophie) Être, existence.'}},
+            'Verbe 1': {0: {'definition': 'Être.'}},
+            'Verbe 2': {0: {'definition': 'Durer.'}, 1: {'definition': 'Suppurer.'}}
         }
         assert self.page.get_parts_of_speech() == result
 
@@ -54,8 +54,8 @@ class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', ['Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.']),
-            ('maitresse de conférence', 28023166, 'Locution nominale', ['Variante orthographique de maitresse de conférences.']),
+            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}}),
+            ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}}),
         ]
     )
     def test_get_definition(self, title, oldid, part_of_speech, definitions):

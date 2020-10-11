@@ -21,17 +21,6 @@ def etymology_cleaner(etymology):
         etymology = re.sub(ignore, '', etymology)
     return etymology
 
-def beautify_section_name(section_name):
-    """Transforms id sections names into nice and readable names."""
-    replacements = {'#': '', '_': ' '}
-    # TODO: to try in one line
-    section_name = re.sub(r'(_\d*)_\d*$', '\g<1>', section_name)
-    section_name = re.sub(r'_1$', '', section_name)
-    for key, value in replacements.items():
-        section_name = section_name.replace(key, value)
-    print(section_name)
-    return section_name
-
 def filter_sections_id(sections, useless_sections):
     """Filters interesting sections."""
     filtered_sections = []
@@ -40,3 +29,6 @@ def filter_sections_id(sections, useless_sections):
             continue
         filtered_sections.append(sections_)
     return filtered_sections
+
+def aggregate_definitions(part_of_speech):
+    return [y['definition'] for x in part_of_speech.values() for y in x.values()]

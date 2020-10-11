@@ -1,8 +1,7 @@
 import pytest
 
 from wiktionnaireparser.utils import (
-    get_languages, remove_sortkey, etymology_cleaner, beautify_section_name,
-    filter_sections_id,
+    get_languages, remove_sortkey, etymology_cleaner, filter_sections_id,
 )
 
 @pytest.mark.parametrize(
@@ -39,19 +38,6 @@ def test_remove_sortkey(input, output):
 )
 def test_etymology_cleaner(input, output):
     assert etymology_cleaner(input) == output
-
-@pytest.mark.parametrize(
-    'raw,clean',
-    [
-        ('Verbe_1', 'Verbe'),
-        ('Verbe_2_2', 'Verbe 2'),
-        ('Verbe_2', 'Verbe 2'),
-        ('Nom_commun_1', 'Nom commun'),
-        ('Nom_commun_2_2', 'Nom commun 2'),
-    ]
-)
-def test_beautify_section_name(raw, clean):
-    assert beautify_section_name(raw) == clean
 
 def test_filter_sections_id():
     sections = ['#Étymologie_10', '#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2', '#Prononciation']

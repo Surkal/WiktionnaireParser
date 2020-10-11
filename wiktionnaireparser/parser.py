@@ -1,10 +1,10 @@
 import re
-#from contextlib import suppress
+from contextlib import suppress
 
 import requests
 from pyquery import PyQuery as pq
 
-from .utils import beautify_section_name, etymology_cleaner, filter_sections_id
+from .utils import etymology_cleaner, filter_sections_id
 
 
 class WiktionnaireParser:
@@ -97,31 +97,76 @@ class WiktionnaireParser:
         """Get the current page title."""
         return self._query.find('h1').text()
 
+    def _real_section_name(self, section_name):
+        """Get section name."""
+        section = self._query.find(section_name)
+        return section.text()
+
     def get_parts_of_speech(self):
         parts_of_speech = {}
         useless_sections = (
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
+            r'Anagrammes',
         )
 
         sections = filter_sections_id(self.sections_id, useless_sections)
         for section_name in sections:
-            nice_section_name = beautify_section_name(section_name)
+            nice_section_name = self._real_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
         return parts_of_speech
 
+    def get_translation(self, example_line):
+        """Get the example translation."""
+        # better than a 'split('\n')'
+        with suppress(AttributeError):
+            translation = example_line.find('dl').find('dd')
+            return translation.text_content().strip()
+
+    def get_examples(self, definition_bloc):
+        examples = {}
+        try:
+            example_line = definition_bloc.find('ul').find('li')
+        except AttributeError:
+            return
+
+        count = 0
+        while True:
+            translation = None
+            example = None
+            try:
+                example = example_line.text_content().strip()
+                translation = self.get_translation(example_line)
+                example_line = example_line.getnext()
+            except AttributeError:
+                break
+
+            ex = {}
+            if example:
+                ex['example'] = example
+                if translation:
+                    ex['translation'] = translation
+                examples[count] = ex
+            count += 1
+
+        return examples
+
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
-        definitions = []
+        definitions = {}
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
         while text.tag != 'ol':
             text = text.getnext()
-        for definition in text.getchildren():
-            raw = definition.text_content()
-            #examples = ''
-            #with suppress(AttributeError):
-                #examples = definition.find('ul').find('li').text_content()
-            definitions.append(raw.split('\n')[0])
+        for i, definition_bloc in enumerate(text.getchildren()):
+            raw = definition_bloc.text_content()
+            definition = raw.split('\n')[0]
+            # Catching examples
+            examples = self.get_examples(definition_bloc)
+
+            if examples:
+                definitions[i] = {'definition': definition, 'examples': examples}
+            else:
+                definitions[i] = {'definition': definition}
         return definitions
 
     def get_etymology(self):
