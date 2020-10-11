@@ -71,3 +71,8 @@ class TestHTMLFromSource:
         assert len(page.sections_id) == 6
         assert len(page.sections_id['#Nom_commun']) == 9
         assert '#Synonymes' in page.sections_id['#Nom_commun']
+
+    def test_messy_related_ords(self):
+        page = WiktionnaireParser.from_source('merci', oldid=28604039)
+        assert page.get_related_words('Synonymes') == {'Nom commun 1': ['grâce', 'miséricorde', 'pitié']}
+        assert page.get_related_words('Dérivés') == {'Nom commun 1': ['sans merci', 'à la merci de'], 'Interjection': ['Dieu merci', 'grand merci', 'merci beaucoup', 'merci énormément', 'merci infiniment', 'mille mercis', 'non merci', 'remercier', 'remerciement', 'un grand merci']}

@@ -194,26 +194,58 @@ class WiktionnaireParser:
 
         return etym
 
-    def get_related_words(self, related_word):
-        """
-        Get related words. Doesn't work for translations.
-        Possible parameters: Apparentés étymologiques, Dérivés, Synonymes,
-            Dérivés dans d’autres langues, Traductions, Hyponymes, Hyperonymes,
-            Variantes orthographiques, Abréviations, Homophones, Méronymes,
-            Vocabulaire apparenté par le sens, etc.
-        """
+    def get_related_words_ids(self, related_word):
         related_word = related_word.replace(' ', '_')
         regex = r'#%s(?:_\d+)?' % related_word
         ids = {}
         for key, values in self.sections_id.items():
+            name = self._query.find(key).text()
             for value in values:
                 if re.match(regex, value):
-                    ids[key] = value
+                    ids[name] = value
+        return ids
+
+    def get_related_words(self, related_word):
+        """
+        Get related words.
+        Possible parameters: Apparentés étymologiques, Dérivés, Synonymes,
+            Dérivés dans d’autres langues, Hyponymes, Hyperonymes,
+            Variantes orthographiques, Abréviations, Homophones, Méronymes,
+            Vocabulaire apparenté par le sens, etc.
+        For translations, use `get_translations`.
+        """
+        ids = self.get_related_words_ids(related_word)
         related_words = {}
         for key, value in ids.items():
             related = []
             section = self._query.find(value)[0]
-            for s in section.getparent().getnext():
-                related.append(s.text_content())
+            section = section.getparent()
+            while section.tag != 'ul':
+                # 1 box
+                if section.tag == 'div' and section.attrib.get('class') == 'boite':
+                    section = section.getprevious().getprevious().find('div')
+                    section = section.find('div').find('div').find('ul')
+                    break
+                section = section.getnext()
+            for s in section:
+                related.append(s.find('a').text_content())
             related_words[key] = related
         return related_words
+
+    def get_translations(self, translation_id):
+        result = {}
+        section = self._query.find(translation_id)[0].getparent()
+        lines = section.getnext().find('div').find('div').getnext().find('div')
+        lines = lines.find('div').find('ul').find('li')
+
+        while lines is not None:
+            language = lines.find('span').text_content()
+            transl = []
+            links = lines.find('a')
+            while links is not None:
+                if links.attrib.get('class') != 'trad-exposant' and links.attrib:
+                    transl.append(links.text_content())
+                links = links.getnext()
+            lines = lines.getnext()
+            result[language] = transl
+        return result
