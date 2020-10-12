@@ -9,7 +9,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="wiktionnaireparser", # Replace with your own username
-    version="0.0.4",
+    version="0.0.5",
     author="Surkal",
     description="A library for parsing the french wiktionnary",
     long_description=long_description,
@@ -22,6 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Topic :: Text Processing",
         "Natural Language :: English",
+        "Natural Language :: French",
     ],
     python_requires='>=3.6',
     install_requires=install_requires,
