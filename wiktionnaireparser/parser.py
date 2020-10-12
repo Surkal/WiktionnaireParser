@@ -142,7 +142,7 @@ class WiktionnaireParser:
             translation = None
             example = None
             try:
-                example = example_line.text_content().strip()
+                example = example_line.text_content().split('\n')[0].strip()
                 translation = self.get_translation(example_line)
                 example_line = example_line.getnext()
             except AttributeError:
@@ -161,6 +161,8 @@ class WiktionnaireParser:
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
         definitions = {}
+        if not part_of_speech.startswith('#'):
+            part_of_speech = '#' + part_of_speech.replace(' ', '_')
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
         while text.tag != 'ol':
