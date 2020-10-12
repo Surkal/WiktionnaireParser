@@ -121,6 +121,12 @@ class WiktionnaireParser:
         for section_name in sections:
             nice_section_name = self._real_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
+            # Translations ?
+            if self._language == 'Français':
+                for value in self.sections_id[section_name]:
+                    if not re.match(r'#Traductions', value):
+                        continue
+                    parts_of_speech[nice_section_name]['translations'] = self.get_translations(value)
             if self.pronunciation:
                 parts_of_speech[nice_section_name]['pronunciation'] = self.pronunciation
             if self.gender:
@@ -135,6 +141,7 @@ class WiktionnaireParser:
             return translation.text_content().strip()
 
     def get_examples(self, definition_bloc):
+        # TODO: Add the ability to remove sources from examples
         examples = {}
         try:
             example_line = definition_bloc.find('ul').find('li')
@@ -262,6 +269,7 @@ class WiktionnaireParser:
         return related_words
 
     def get_translations(self, translation_id):
+        """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
         lines = section.getnext().find('div').find('div').getnext().find('div')

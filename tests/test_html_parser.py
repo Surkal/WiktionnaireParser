@@ -60,7 +60,7 @@ class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'gender': 'masculin'}),
+            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'gender': 'masculin', 'translations': {'Anglais': ['Vafsi'], 'Persan': ['وفسی'], 'Vafsi': ['ووسی']}}),
             ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}, 'gender': 'féminin', 'pronunciation': ['mɛ.tʁɛs də kɔ̃.fe.ʁɑ̃s']}),
         ]
     )
