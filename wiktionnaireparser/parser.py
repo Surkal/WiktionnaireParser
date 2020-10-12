@@ -14,9 +14,8 @@ class WiktionnaireParser:
     def __init__(self, html, language='Français'):
         self.html = html
         self._query = pq(html)
-        self._language = language
         self.sections_id = {}
-        self._find_lang_sections_id()
+        self.language = language
 
     @classmethod
     def from_source(cls, title, language='Français', oldid=None):
@@ -47,6 +46,7 @@ class WiktionnaireParser:
 
     @language.setter
     def language(self, language):
+        language = language[0].upper() + language[1:]
         self._language = language
         self._find_lang_sections_id()
 

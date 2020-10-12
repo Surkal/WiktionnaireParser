@@ -21,6 +21,12 @@ class TestWiktionnaireParser:
     def test_language_by_default(self):
         assert self.page.language == 'Français'
 
+    def test_language_setter(self):
+        p = WiktionnaireParser(self.page.html, 'anglais')
+        assert p.language == 'Anglais'
+        p = WiktionnaireParser(self.page.html, 'Same du Nord')
+        assert p.language == 'Same du Nord'
+
     @pytest.mark.parametrize(
         'language,etymology',
         [
