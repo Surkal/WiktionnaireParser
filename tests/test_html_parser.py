@@ -39,10 +39,10 @@ class TestWiktionnaireParser:
     def test_get_parts_of_speech(self):
         self.page.language = 'Suédois'
         result = {
-            'Nom commun 1': {0: {'definition': 'Denrée, marchandise, produit.'}},
-            'Nom commun 2': {0: {'definition': '(Philosophie) Être, existence.'}},
-            'Verbe 1': {0: {'definition': 'Être.'}},
-            'Verbe 2': {0: {'definition': 'Durer.'}, 1: {'definition': 'Suppurer.'}}
+            'Nom commun 1': {0: {'definition': 'Denrée, marchandise, produit.'}, 'gender': 'commun', 'pronunciation': ['ˈvɑː.ˌra']},
+            'Nom commun 2': {0: {'definition': '(Philosophie) Être, existence.'}, 'gender': 'neutre'},
+            'Verbe 1': {0: {'definition': 'Être.'}, 'pronunciation': ['ˈvɑː.ˌra']},
+            'Verbe 2': {0: {'definition': 'Durer.'}, 1: {'definition': 'Suppurer.'}, 'pronunciation': ['ˈvɑː.ˌra']}
         }
         assert self.page.get_parts_of_speech() == result
 
@@ -54,8 +54,8 @@ class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}}),
-            ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}}),
+            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'gender': 'masculin'}),
+            ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}, 'gender': 'féminin', 'pronunciation': ['mɛ.tʁɛs də kɔ̃.fe.ʁɑ̃s']}),
         ]
     )
     def test_get_definition(self, title, oldid, part_of_speech, definitions):
@@ -83,4 +83,11 @@ class TestHTMLFromSource:
     def test_examples(self):
         page = WiktionnaireParser.from_source('föra', oldid=28301121)
         assert page.get_definitions('Verbe') == {0: {'definition': 'Conduire, mener, diriger, amener.', 'examples': {0: {'example': 'Föra en dam till bordet.', 'translation': 'Conduire une dame à table.'}, 1: {'example': 'Föra trupperna till seger.', 'translation': 'Conduire des troupes à la victoire.'}, 2: {'example': 'Föra i ledband.', 'translation': 'Mener en laisse.'}, 3: {'example': 'Föra ett land till branten av undergång.', 'translation': 'Mener un pays à sa perte.'}, 4: {'example': 'Detta brott förde honom till galgen.', 'translation': 'Ce crime le conduisit à la potence.'}, 5: {'example': 'En rymdfarkost inriktad på att föra en människa i omloppsbana runt jorden.', 'translation': 'Un vaisseau spatial ajusté pour amener un homme en orbite autour de la terre.'}}}}
-        
+
+    def test_pronunciation(self):
+        page = WiktionnaireParser.from_source('moins', oldid=28516602)
+        data = page.get_word_data
+        assert data['partOfSpeech']['Adverbe']['pronunciation'] == ['mwɛ̃', 'mwɛ̃s']
+        assert data['partOfSpeech']['Adverbe']['gender'] == 'invariable'
+        assert data['partOfSpeech']['Conjonction']['pronunciation'] == ['mwɛ̃']
+        assert data['partOfSpeech']['Conjonction']['gender'] == 'invariable'

@@ -121,6 +121,10 @@ class WiktionnaireParser:
         for section_name in sections:
             nice_section_name = self._real_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
+            if self.pronunciation:
+                parts_of_speech[nice_section_name]['pronunciation'] = self.pronunciation
+            if self.gender:
+                parts_of_speech[nice_section_name]['gender'] = self.gender
         return parts_of_speech
 
     def get_translation(self, example_line):
@@ -158,6 +162,27 @@ class WiktionnaireParser:
 
         return examples
 
+    def ligne_de_forme(self, line):
+        self.pronunciation = []
+        self.gender = ''
+        if line.find('a') is not None:
+            line_ = line.find('a')
+            while line_ is not None:
+                with suppress(AttributeError):
+                    if line_.find('span').attrib.get('class') == 'API':
+                        self.pronunciation.append(line_.text_content())
+                line_ = line_.getnext()
+        # TODO: DRY
+        if line.find('span') is not None:
+            line_ = line.find('span')
+            while line_ is not None:
+                if line_.attrib.get('class') == 'ligne-de-forme':
+                    self.gender = line_.text_content()
+                    break
+                line_ = line_.getnext()
+
+        self.pronunciation = list(map(lambda x: x.replace('\\', ''), self.pronunciation))
+
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
         definitions = {}
@@ -166,6 +191,9 @@ class WiktionnaireParser:
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
         while text.tag != 'ol':
+            # ligne de forme
+            if text.tag == 'p' or text.tag == 'span':
+                self.ligne_de_forme(text)
             text = text.getnext()
         for i, definition_bloc in enumerate(text.getchildren()):
             raw = definition_bloc.text_content()
@@ -208,6 +236,7 @@ class WiktionnaireParser:
         return ids
 
     def get_related_words(self, related_word):
+        # TODO: pb 'föra' suédois 'Dérivés'
         """
         Get related words.
         Possible parameters: Apparentés étymologiques, Dérivés, Synonymes,
