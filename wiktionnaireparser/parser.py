@@ -200,11 +200,9 @@ class WiktionnaireParser:
             definition = raw.split('\n')[0]
             # Catching examples
             examples = self.get_examples(definition_bloc)
-
+            definitions[i] = {'definition': definition}
             if examples:
-                definitions[i] = {'definition': definition, 'examples': examples}
-            else:
-                definitions[i] = {'definition': definition}
+                definitions[i]['examples'] = examples
         return definitions
 
     def get_etymology(self):
