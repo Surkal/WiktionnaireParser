@@ -67,7 +67,9 @@ Use `get_word_data` to extract and display all data
                 'Roumain': ['anglofon']
             },
             'pronunciation': ['ɑ̃.ɡlɔ.fɔn'],
-            'gender': 'masculin et féminin identiques'
+            'gender': 'masculin et féminin identiques',
+            'Dérivés': ['Anglo-Bami', 'anglo-fou', 'angryphone'],
+            'Apparentés étymologiques': ['Angleterre', 'anglais', '-phone']
         },
         'Adjectif': {
             0: {
@@ -91,7 +93,8 @@ Use `get_word_data` to extract and display all data
                 'Roumain': ['anglofon']
             },
             'pronunciation': ['ɑ̃.ɡlɔ.fɔn'],
-            'gender': 'masculin et féminin identiques'
+            'gender': 'masculin et féminin identiques',
+            'Dérivés': ['anglo-fou']
         }
     }
 }
