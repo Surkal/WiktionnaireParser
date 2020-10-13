@@ -114,7 +114,7 @@ class WiktionnaireParser:
         parts_of_speech = {}
         useless_sections = (
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
-            r'Anagrammes',
+            r'Anagrammes', r'Liens_externes'
         )
 
         sections = filter_sections_id(self.sections_id.keys(), useless_sections)
