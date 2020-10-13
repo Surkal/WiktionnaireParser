@@ -131,6 +131,22 @@ class WiktionnaireParser:
                 parts_of_speech[nice_section_name]['pronunciation'] = self.pronunciation
             if self.gender:
                 parts_of_speech[nice_section_name]['gender'] = self.gender
+
+        p = [
+            'Variantes orthographiques', 'Variantes', 'Abréviations',
+            'Transcriptions dans diverses écritures', 'Augmentatifs',
+            'Diminutifs', 'Synonymes', 'Quasi-synonymes', 'Antonymes',
+            'Gentilés', 'Composés', 'Dérivés', 'Apparentés étymologiques',
+            'Vocabulaire', 'Phrases', 'Variantes dialectales', 'Hyperonymes',
+            'Hyponymes', 'Holonymes', 'Méronymes', 'Troponymes',
+            'Dérivés dans d’autres langues', 'Faux-amis', 'Notes', 'Paronymes',
+            'Anagrammes', 'Voir aussi'
+        ]
+        for p_ in p:
+            related = self.get_related_words(p_)
+            if related:
+                for key, values in related.items():
+                    parts_of_speech[key][p_] = values
         return parts_of_speech
 
     def get_translation(self, example_line):
@@ -236,10 +252,12 @@ class WiktionnaireParser:
         for key, values in self.sections_id.items():
             name = self._query.find(key).text()
             for value in values:
-                if re.match(regex, value):
+                if re.fullmatch(regex, value):
                     ids[name] = value
         return ids
 
+    import pysnooper
+    #@pysnooper.snoop()
     def get_related_words(self, related_word):
         # TODO: pb 'föra' suédois 'Dérivés'
         """
@@ -256,15 +274,36 @@ class WiktionnaireParser:
             related = []
             section = self._query.find(value)[0]
             section = section.getparent()
+            count = 0
             while section.tag != 'ul':
+
+                if count and any(section.tag == x for x in ('h3', 'h4')):
+                    break
+
+                if section.tag == 'dl':
+                    if section.find('dd'):
+                        related.append(section.find('dd').text_content())
+                    else:
+                        related.append(section.text_content())
+
+                # cf
+                if section.tag == 'p':
+                    if section.find('i') is not None:
+                        section_ = section.find('i')
+                        while section_ and section_.find('a') is not None:
+                            related.append(section_.find('a').text_content())
+                            section_ = section_.getnext()
+
                 # 1 box
                 if section.tag == 'div' and section.attrib.get('class') == 'boite':
-                    section = section.getprevious().getprevious().find('div')
+                    section = section.find('div')
                     section = section.find('div').find('div').find('ul')
                     break
                 section = section.getnext()
+                count += 1
             for s in section:
-                related.append(s.find('a').text_content())
+                if s.find('a') is not None:
+                    related.append(s.find('a').text_content())
             related_words[key] = related
         return related_words
 

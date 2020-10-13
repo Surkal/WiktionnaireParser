@@ -60,7 +60,7 @@ class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'gender': 'masculin', 'translations': {'Anglais': ['Vafsi'], 'Persan': ['وفسی'], 'Vafsi': ['ووسی']}}),
+            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'translations': {'Anglais': ['Vafsi'], 'Persan': ['وفسی'], 'Vafsi': ['ووسی']}, 'gender': 'masculin', 'Notes': ['Le code de cette langue (vafsi) dans le Wiktionnaire est vaf.', 'modifier le wikicode']}),
             ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}, 'gender': 'féminin', 'pronunciation': ['mɛ.tʁɛs də kɔ̃.fe.ʁɑ̃s']}),
         ]
     )
@@ -97,3 +97,7 @@ class TestHTMLFromSource:
         assert data['partOfSpeech']['Adverbe']['gender'] == 'invariable'
         assert data['partOfSpeech']['Conjonction']['pronunciation'] == ['mwɛ̃']
         assert data['partOfSpeech']['Conjonction']['gender'] == 'invariable'
+
+    def test_related_words_in_cf(self):
+        page = WiktionnaireParser.from_source('anglophone', oldid=28197224)
+        assert page.get_word_data == {'title': 'anglophone', 'etymologies': 'Composé du préfixe latin anglo pour anglais et du suffixe -phone.', 'partOfSpeech': {'Nom commun': {0: {'definition': 'Personne parlant la langue anglaise.', 'examples': {0: {'example': 'La minorité anglaise avait également reçu, de façon encore plus discrète, une autre «\xa0protection\xa0»: le trésorier du Québec serait un anglophone, un anglophone choisi par les financiers. —\xa0(Laurent Laplante, Paul Berryman, 2000)'}}}, 'translations': {'Allemand': ['Englischsprachige'], 'Anglais': ['English-speaker', 'anglophone'], 'Breton': ['saozneger'], 'Catalan': ['anglòfon', 'anglòfona', 'angloparlant'], 'Espagnol': ['anglófono', 'anglófona', 'anglohablante'], 'Espéranto': ['anglalingvano'], 'Italien': ['anglofono'], 'Néerlandais': ['Engelstalige'], 'Portugais': ['anglófono', 'anglofalante', 'angloparlante'], 'Roumain': ['anglofon']}, 'pronunciation': ['ɑ̃.ɡlɔ.fɔn'], 'gender': 'masculin et féminin identiques', 'Dérivés': ['Anglo-Bami', 'anglo-fou', 'angryphone'], 'Apparentés étymologiques': ['Angleterre', 'anglais', '-phone', 'modifier le wikicode']}, 'Adjectif': {0: {'definition': 'De langue anglaise.', 'examples': {0: {'example': "Selon plusieurs penseurs de l'époque, l'État québécois est le seul qui puisse rivaliser avec les grandes entreprises anglophones d'Amérique du Nord. —\xa0(Mathieu Bureau Meunier, Wake up mes bons amis!, Québec, Septentrion, 2019, p. 133.)"}}}, 'translations': {'Allemand': ['englischsprachig'], 'Anglais': ['anglophone'], 'Espagnol': ['anglófono', 'anglohablante'], 'Espéranto': ['anglalingva'], 'Italien': ['anglofono'], 'Kazakh': ['ағылшынтілді'], 'Néerlandais': ['Engelstalig'], 'Norvégien (bokmål)': ['engelskspråklig'], 'Portugais': ['anglófono', 'anglofalante', 'angloparlante'], 'Roumain': ['anglofon']}, 'pronunciation': ['ɑ̃.ɡlɔ.fɔn'], 'gender': 'masculin et féminin identiques', 'Dérivés': ['anglo-fou']}}}
