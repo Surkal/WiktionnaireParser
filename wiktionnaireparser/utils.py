@@ -32,3 +32,12 @@ def filter_sections_id(sections, useless_sections):
 
 def aggregate_definitions(part_of_speech):
     return [y['definition'] for x in part_of_speech.values() for y in x.values()]
+
+def filter_related_words(related_words):
+    useless = [r'modifier le wikicode']
+    related_words_copy = []
+    for word in related_words:
+        for regex in useless:
+            if not re.fullmatch(regex, word):
+                related_words_copy.append(word)
+    return related_words_copy

@@ -2,6 +2,7 @@ import pytest
 
 from wiktionnaireparser.utils import (
     get_languages, remove_sortkey, etymology_cleaner, filter_sections_id,
+    filter_related_words,
 )
 
 @pytest.mark.parametrize(
@@ -45,3 +46,7 @@ def test_filter_sections_id():
         r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
     )
     assert filter_sections_id(sections, useless) == ['#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2']
+
+def test_filter_related_words():
+    related_words = ['Angleterre', 'anglais', '-phone', 'modifier le wikicode']
+    assert filter_related_words(related_words) == ['Angleterre', 'anglais', '-phone']

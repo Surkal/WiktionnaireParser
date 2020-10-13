@@ -4,7 +4,7 @@ from contextlib import suppress
 import requests
 from pyquery import PyQuery as pq
 
-from .utils import etymology_cleaner, filter_sections_id
+from .utils import etymology_cleaner, filter_sections_id, filter_related_words
 
 
 class WiktionnaireParser:
@@ -256,8 +256,6 @@ class WiktionnaireParser:
                     ids[name] = value
         return ids
 
-    import pysnooper
-    #@pysnooper.snoop()
     def get_related_words(self, related_word):
         # TODO: pb 'föra' suédois 'Dérivés'
         """
@@ -304,6 +302,7 @@ class WiktionnaireParser:
             for s in section:
                 if s.find('a') is not None:
                     related.append(s.find('a').text_content())
+            related = filter_related_words(related)
             related_words[key] = related
         return related_words
 
