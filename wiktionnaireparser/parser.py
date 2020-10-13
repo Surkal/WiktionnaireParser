@@ -311,8 +311,11 @@ class WiktionnaireParser:
         """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
-        lines = section.getnext().find('div').find('div').getnext().find('div')
-        lines = lines.find('div').find('ul').find('li')
+        try:
+            lines = section.getnext().find('div').find('div').getnext().find('div')
+            lines = lines.find('div').find('ul').find('li')
+        except AttributeError:
+            return result
 
         while lines is not None:
             language = lines.find('span').text_content()
