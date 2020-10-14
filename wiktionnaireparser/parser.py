@@ -146,7 +146,10 @@ class WiktionnaireParser:
             related = self.get_related_words(p_)
             if related:
                 for key, values in related.items():
-                    parts_of_speech[key][p_] = values
+                    try:
+                        parts_of_speech[key][p_] = values
+                    except KeyError:
+                        parts_of_speech[p_] = values
         return parts_of_speech
 
     def get_translation(self, example_line):
