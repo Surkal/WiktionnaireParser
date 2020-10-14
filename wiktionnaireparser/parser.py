@@ -259,6 +259,8 @@ class WiktionnaireParser:
                     ids[name] = value
         return ids
 
+    import pysnooper
+    @pysnooper.snoop()
     def get_related_words(self, related_word):
         # TODO: pb 'föra' suédois 'Dérivés'
         """
@@ -298,8 +300,18 @@ class WiktionnaireParser:
                 # 1 box
                 if section.tag == 'div' and section.attrib.get('class') == 'boite':
                     section = section.find('div')
-                    section = section.find('div').find('div').find('ul')
+                    # box with description
+                    # section.find('.NavContent') doesn't seem to work
+                    if section.attrib.get('class') == 'NavFrame':
+                        section = section.find('div')
+                        while section.attrib.get('class') != 'NavContent':
+                            section = section.getnext()
+                    if section.attrib.get('class') == 'NavContent':
+                        section = section.find('div').find('ul')
+                    else:
+                        section = section.find('div').find('div').find('ul')
                     break
+
                 section = section.getnext()
                 count += 1
             for s in section:

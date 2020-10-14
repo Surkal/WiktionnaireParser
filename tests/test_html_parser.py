@@ -109,3 +109,7 @@ class TestHTMLFromSource:
     def test_paronymes(self):
         page = WiktionnaireParser.from_source('paupière', oldid=28666149)
         assert page.get_word_data['partOfSpeech']['Paronymes'] == ['paupiette']
+
+    def test_box_with_description(self):
+        page = WiktionnaireParser.from_source('astate', oldid=28632062)
+        assert page.get_word_data['partOfSpeech']['Nom commun 1']['Synonymes'] == ['alabame', 'alabamium', 'anglohelvétium', 'dakin', 'dor', 'éka-iode', 'ékaiode', 'helvétium']
