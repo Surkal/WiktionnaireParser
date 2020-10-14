@@ -105,3 +105,7 @@ class TestHTMLFromSource:
     def test_empty_translations(self):
         page = WiktionnaireParser.from_source('aggrégation', oldid=28198632)
         assert not page.get_word_data['partOfSpeech']['Nom commun']['translations']
+
+    def test_paronymes(self):
+        page = WiktionnaireParser.from_source('paupière', oldid=28666149)
+        assert page.get_word_data['partOfSpeech']['Paronymes'] == ['paupiette']
