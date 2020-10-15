@@ -209,6 +209,19 @@ class WiktionnaireParser:
 
         self.pronunciation = list(map(lambda x: x.replace('\\', ''), self.pronunciation))
 
+    def get_subdefinitions(self, text):
+        # TODO: DRY
+        subdefinitions = {}
+        for i, definition_bloc in enumerate(text.getchildren()):
+            raw = definition_bloc.text_content()
+            definition = raw.split('\n')[0]
+            # Catching examples
+            examples = self.get_examples(definition_bloc)
+            subdefinitions[i] = {'subdefinition': definition}
+            if examples:
+                subdefinitions[i]['examples'] = examples
+        return subdefinitions
+
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
         definitions = {}
@@ -229,6 +242,8 @@ class WiktionnaireParser:
             definitions[i] = {'definition': definition}
             if examples:
                 definitions[i]['examples'] = examples
+            if definition_bloc.find('ol'):
+                definitions[i]['subdefinitions'] = self.get_subdefinitions(definition_bloc.find('ol'))
         return definitions
 
     def get_etymology(self):
@@ -259,8 +274,6 @@ class WiktionnaireParser:
                     ids[name] = value
         return ids
 
-    import pysnooper
-    @pysnooper.snoop()
     def get_related_words(self, related_word):
         # TODO: pb 'föra' suédois 'Dérivés'
         """

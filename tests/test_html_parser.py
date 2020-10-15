@@ -113,3 +113,8 @@ class TestHTMLFromSource:
     def test_box_with_description(self):
         page = WiktionnaireParser.from_source('astate', oldid=28632062)
         assert page.get_word_data['partOfSpeech']['Nom commun 1']['Synonymes'] == ['alabame', 'alabamium', 'anglohelvétium', 'dakin', 'dor', 'éka-iode', 'ékaiode', 'helvétium']
+
+    def test_subdefinitions(self):
+        page = WiktionnaireParser.from_source('ta', language='Suédois')
+        assert len(page.get_word_data['partOfSpeech']['Verbe'][0]['subdefinitions']) == 19
+        assert len(page.get_word_data['partOfSpeech']['Verbe'][0]['subdefinitions'][2]['subdefinition']) == 90
