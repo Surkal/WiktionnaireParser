@@ -41,3 +41,14 @@ def filter_related_words(related_words):
             if not re.fullmatch(regex, word):
                 related_words_copy.append(word)
     return related_words_copy
+
+def extract_related_words(section):
+    related = []
+    url = '/wiki/'
+    while section.tag != 'h3' and section.tag != 'h4':
+        for link in section.cssselect('a'):
+            if 'Annexe:' in link.attrib.get('href'):
+                continue
+            related.append(link.text_content())
+        section = section.getnext()
+    return related

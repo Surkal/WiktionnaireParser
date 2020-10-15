@@ -4,7 +4,7 @@ from contextlib import suppress
 import requests
 from pyquery import PyQuery as pq
 
-from .utils import etymology_cleaner, filter_sections_id, filter_related_words
+from .utils import etymology_cleaner, filter_sections_id, filter_related_words, extract_related_words
 
 
 class WiktionnaireParser:
@@ -274,8 +274,14 @@ class WiktionnaireParser:
                     ids[name] = value
         return ids
 
+    def get_notes(self, section):
+        text = []
+        while section.tag != 'h3' and section.tag != 'h4':
+            text.append(section.text_content())
+            section = section.getnext()
+        return '\n'.join(text)
+
     def get_related_words(self, related_word):
-        # TODO: pb 'föra' suédois 'Dérivés'
         """
         Get related words.
         Possible parameters: Apparentés étymologiques, Dérivés, Synonymes,
@@ -289,48 +295,13 @@ class WiktionnaireParser:
         for key, value in ids.items():
             related = []
             section = self._query.find(value)[0]
-            section = section.getparent()
-            count = 0
-            while section.tag != 'ul':
+            #section = section.getparent()
 
-                if count and any(section.tag == x for x in ('h3', 'h4')):
-                    break
-
-                if section.tag == 'dl':
-                    if section.find('dd'):
-                        related.append(section.find('dd').text_content())
-                    else:
-                        related.append(section.text_content())
-
-                # cf
-                if section.tag == 'p':
-                    if section.find('i') is not None:
-                        section_ = section.find('i')
-                        while section_ and section_.find('a') is not None:
-                            related.append(section_.find('a').text_content())
-                            section_ = section_.getnext()
-
-                # 1 box
-                if section.tag == 'div' and section.attrib.get('class') == 'boite':
-                    section = section.find('div')
-                    # box with description
-                    # section.find('.NavContent') doesn't seem to work
-                    if section.attrib.get('class') == 'NavFrame':
-                        section = section.find('div')
-                        while section.attrib.get('class') != 'NavContent':
-                            section = section.getnext()
-                    if section.attrib.get('class') == 'NavContent':
-                        section = section.find('div').find('ul')
-                    else:
-                        section = section.find('div').find('div').find('ul')
-                    break
-
-                section = section.getnext()
-                count += 1
-            for s in section:
-                if s.find('a') is not None:
-                    related.append(s.find('a').text_content())
-            related = filter_related_words(related)
+            section = section.getparent().getnext()
+            if 'Notes' in value:
+                related = self.get_notes(section)
+            else:
+                related = extract_related_words(section)
             related_words[key] = related
         return related_words
 

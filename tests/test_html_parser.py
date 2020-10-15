@@ -60,7 +60,7 @@ class TestHTMLFromSource:
     @pytest.mark.parametrize(
         'title,oldid,part_of_speech,definitions',
         [
-            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'translations': {'Anglais': ['Vafsi'], 'Persan': ['وفسی'], 'Vafsi': ['ووسی']}, 'gender': 'masculin', 'Notes': ['Le code de cette langue (vafsi) dans le Wiktionnaire est vaf.']}),
+            ('vafsi', 28592326, 'Nom commun', {0: {'definition': 'Langue iranienne parlée dans le village de Vafs et ses environs dans la province de Markazi en Iran.'}, 'translations': {'Anglais': ['Vafsi'], 'Persan': ['وفسی'], 'Vafsi': ['ووسی']}, 'gender': 'masculin', 'Notes': 'Le code de cette langue (vafsi) dans le Wiktionnaire est vaf.'}),
             ('maitresse de conférence', 28023166, 'Locution nominale', {0: {'definition': 'Variante orthographique de maitresse de conférences.'}, 'gender': 'féminin', 'pronunciation': ['mɛ.tʁɛs də kɔ̃.fe.ʁɑ̃s']}),
         ]
     )
@@ -112,7 +112,7 @@ class TestHTMLFromSource:
 
     def test_box_with_description(self):
         page = WiktionnaireParser.from_source('astate', oldid=28632062)
-        assert page.get_word_data['partOfSpeech']['Nom commun 1']['Synonymes'] == ['alabame', 'alabamium', 'anglohelvétium', 'dakin', 'dor', 'éka-iode', 'ékaiode', 'helvétium']
+        assert page.get_word_data['partOfSpeech']['Nom commun 1']['Synonymes'] == ['alabame', 'alabamium', 'alabamine', 'anglohelvétium', 'dakin', 'dor', 'éka-iode', 'ékaiode', 'helvétium']
 
     def test_subdefinitions(self):
         page = WiktionnaireParser.from_source('ta', language='Suédois')
