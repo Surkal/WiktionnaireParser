@@ -8,9 +8,7 @@ from .utils import etymology_cleaner, filter_sections_id, extract_related_words
 
 
 class WiktionnaireParser:
-    """
-    Main class to analyze the HTML code of a wiktionary page.
-    """
+    """Main class to analyze the HTML code of a wiktionary page."""
     def __init__(self, html, language='Français'):
         self.html = html
         self._query = pq(html)
@@ -111,6 +109,7 @@ class WiktionnaireParser:
         return section.text()
 
     def get_parts_of_speech(self):
+        """Extract all parts of speech."""
         parts_of_speech = {}
         useless_sections = (
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
@@ -160,6 +159,7 @@ class WiktionnaireParser:
             return translation.text_content().strip()
 
     def get_examples(self, definition_bloc):
+        """Extract examples."""
         # TODO: Add the ability to remove sources from examples
         examples = {}
         try:
@@ -263,7 +263,7 @@ class WiktionnaireParser:
 
         return etym
 
-    def get_related_words_ids(self, related_word):
+    def _related_words_ids(self, related_word):
         related_word = related_word.replace(' ', '_')
         regex = r'#%s(?:_\d+)?' % related_word
         ids = {}
@@ -275,6 +275,7 @@ class WiktionnaireParser:
         return ids
 
     def get_notes(self, section):
+        """Extract the text content of the 'Notes' section."""
         text = []
         while section.tag != 'h3' and section.tag != 'h4':
             text.append(section.text_content())
@@ -290,7 +291,7 @@ class WiktionnaireParser:
             Vocabulaire apparenté par le sens, etc.
         For translations, use `get_translations`.
         """
-        ids = self.get_related_words_ids(related_word)
+        ids = self._related_words_ids(related_word)
         related_words = {}
         for key, value in ids.items():
             related = []
