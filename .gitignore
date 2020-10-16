@@ -6,3 +6,5 @@ htmlcov/*
 *.egg-info
 dist/*
 build/*
+coverage.xml
+bin/*

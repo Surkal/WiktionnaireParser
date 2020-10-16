@@ -4,7 +4,7 @@ from contextlib import suppress
 import requests
 from pyquery import PyQuery as pq
 
-from .utils import etymology_cleaner, filter_sections_id, filter_related_words, extract_related_words
+from .utils import etymology_cleaner, filter_sections_id, extract_related_words
 
 
 class WiktionnaireParser:
@@ -295,7 +295,6 @@ class WiktionnaireParser:
         for key, value in ids.items():
             related = []
             section = self._query.find(value)[0]
-            #section = section.getparent()
 
             section = section.getparent().getnext()
             if 'Notes' in value:

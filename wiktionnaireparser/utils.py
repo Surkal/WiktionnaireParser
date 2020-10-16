@@ -1,13 +1,5 @@
 import re
 
-def get_languages(wikitext):
-    """Returns the code of the languages having a section in the wikitext input."""
-    return re.findall(r"{{langue\|([^\}]+)}\}", wikitext)
-
-def remove_sortkey(title):
-    sortkey_regex = r"\|clé=[^\|}]+"
-    return re.sub(sortkey_regex, "", title)
-
 def etymology_cleaner(etymology):
     """
     Cleans up the etymology of the text prompting
@@ -29,18 +21,6 @@ def filter_sections_id(sections, useless_sections):
             continue
         filtered_sections.append(sections_)
     return filtered_sections
-
-def aggregate_definitions(part_of_speech):
-    return [y['definition'] for x in part_of_speech.values() for y in x.values()]
-
-def filter_related_words(related_words):
-    useless = [r'modifier le wikicode']
-    related_words_copy = []
-    for word in related_words:
-        for regex in useless:
-            if not re.fullmatch(regex, word):
-                related_words_copy.append(word)
-    return related_words_copy
 
 def extract_related_words(section):
     related = []
