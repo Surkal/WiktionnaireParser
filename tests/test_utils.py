@@ -4,6 +4,7 @@ from wiktionnaireparser.utils import (
     etymology_cleaner, filter_sections_id
 )
 
+
 @pytest.mark.parametrize(
     "input,output",
     [
@@ -14,6 +15,7 @@ from wiktionnaireparser.utils import (
 )
 def test_etymology_cleaner(input, output):
     assert etymology_cleaner(input) == output
+
 
 def test_filter_sections_id():
     sections = ['#Étymologie_10', '#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2', '#Prononciation']

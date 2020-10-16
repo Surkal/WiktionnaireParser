@@ -1,17 +1,19 @@
 import re
 
+
 def etymology_cleaner(etymology):
     """
     Cleans up the etymology of the text prompting
     site visitors to contribute.
     """
-    ignore_etym =   [
+    ignore_etym = [
         r'^Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici\.$',
         r'\(Siècle à préciser\) ',
     ]
     for ignore in ignore_etym:
         etymology = re.sub(ignore, '', etymology)
     return etymology
+
 
 def filter_sections_id(sections, useless_sections):
     """Filters interesting sections."""
@@ -21,6 +23,7 @@ def filter_sections_id(sections, useless_sections):
             continue
         filtered_sections.append(sections_)
     return filtered_sections
+
 
 def extract_related_words(section):
     related = []
