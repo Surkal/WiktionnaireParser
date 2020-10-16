@@ -117,23 +117,24 @@ class WiktionnaireParser:
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
             r'Anagrammes', r'Liens_externes'
         )
-
         sections = filter_sections_id(self.sections_id.keys(), useless_sections)
         for section_name in sections:
             nice_section_name = self._real_section_name(section_name)
             parts_of_speech[nice_section_name] = self.get_definitions(section_name)
-            # Translations ?
-            if self._language == 'Français':
-                for value in self.sections_id[section_name]:
-                    if not re.match(r'#Traductions', value):
-                        continue
-                    parts_of_speech[nice_section_name]['translations'] = self.get_translations(value)
             if self.pronunciation:
                 parts_of_speech[nice_section_name]['pronunciation'] = self.pronunciation
             if self.gender:
                 parts_of_speech[nice_section_name]['gender'] = self.gender
+            # Translations ?
+            if self._language != 'Français':
+                continue
+            for value in self.sections_id[section_name]:
+                if not re.match(r'#Traductions', value):
+                    continue
+                translation = self.get_translations(value)
+                parts_of_speech[nice_section_name]['translations'] = translation
 
-        p = [
+        parts = [
             'Variantes orthographiques', 'Variantes', 'Abréviations',
             'Transcriptions dans diverses écritures', 'Augmentatifs',
             'Diminutifs', 'Synonymes', 'Quasi-synonymes', 'Antonymes',
@@ -143,22 +144,10 @@ class WiktionnaireParser:
             'Dérivés dans d’autres langues', 'Faux-amis', 'Notes', 'Paronymes',
             'Anagrammes', 'Voir aussi'
         ]
-        for p_ in p:
-            related = self.get_related_words(p_)
-            if related:
-                for key, values in related.items():
-                    try:
-                        parts_of_speech[key][p_] = values
-                    except KeyError:
-                        parts_of_speech[p_] = values
+        for part in parts:
+            related = self.get_related_words(part)
+            parts_of_speech = insert_related_words(parts_of_speech, part, related)
         return parts_of_speech
-
-    def get_translation(self, example_line):
-        """Get the example translation."""
-        # better than a 'split('\n')'
-        with suppress(AttributeError):
-            translation = example_line.find('dl').find('dd')
-            return translation.text_content().strip()
 
     def get_examples(self, definition_bloc):
         """Extract examples."""
@@ -175,7 +164,7 @@ class WiktionnaireParser:
             example = None
             try:
                 example = example_line.text_content().split('\n')[0].strip()
-                translation = self.get_translation(example_line)
+                translation = get_translation(example_line)
                 example_line = example_line.getnext()
             except AttributeError:
                 break
@@ -245,7 +234,8 @@ class WiktionnaireParser:
             if examples:
                 definitions[i]['examples'] = examples
             if definition_bloc.find('ol'):
-                definitions[i]['subdefinitions'] = self.get_subdefinitions(definition_bloc.find('ol'))
+                subdefinitions = self.get_subdefinitions(definition_bloc.find('ol'))
+                definitions[i]['subdefinitions'] = subdefinitions
         return definitions
 
     def get_etymology(self):
@@ -328,3 +318,22 @@ class WiktionnaireParser:
             lines = lines.getnext()
             result[language] = transl
         return result
+
+
+def insert_related_words(parts_of_speech, part, related):
+    """Insert extracted data in parts_of_speech dictionary."""
+    if not related:
+        return parts_of_speech
+    for key, values in related.items():
+        try:
+            parts_of_speech[key][part] = values
+        except KeyError:
+            parts_of_speech[part] = values
+    return parts_of_speech
+
+def get_translation(example_line):
+    """Get the example translation."""
+    # better than a 'split('\n')'
+    with suppress(AttributeError):
+        translation = example_line.find('dl').find('dd')
+        return translation.text_content().strip()
