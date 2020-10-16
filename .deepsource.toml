@@ -11,6 +11,10 @@ exclude_patterns = [
 name = "python"
 enabled = true
 
-  [analyzers.meta]
-  runtime_version = "3.x.x"
-  max_line_length = 125
+   [analyzers.meta]
+   runtime_version = "3.x.x"
+   max_line_length = 125
+
+ [[analyzers]]
+ name = "test-coverage"
+ enabled = true
