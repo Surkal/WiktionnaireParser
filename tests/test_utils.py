@@ -13,8 +13,8 @@ from wiktionnaireparser.utils import (
         ('(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', '(Nom commun 3) Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.')
     ]
 )
-def test_etymology_cleaner(input, output):
-    assert etymology_cleaner(input) == output
+def test_etymology_cleaner(input_, output):
+    assert etymology_cleaner(input_) == output
 
 
 def test_filter_sections_id():
