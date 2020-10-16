@@ -1,20 +1,16 @@
 version = 1
 
-test_patterns = ["tests/**"]
+test_patterns = ["*/tests/**"]
 
-exclude_patterns = [
-  "setup.py",
-  "tests/**",
-]
+exclude_patterns = ["setup.py"]
 
 [[analyzers]]
 name = "python"
 enabled = true
 
-   [analyzers.meta]
-   runtime_version = "3.x.x"
-   max_line_length = 125
+  [analyzers.meta]
+  runtime_version = "3.x.x"
 
- [[analyzers]]
- name = "test-coverage"
- enabled = true
+[[analyzers]]
+name = "test-coverage"
+enabled = true
