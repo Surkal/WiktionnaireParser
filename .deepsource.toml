@@ -1,16 +1,17 @@
 version = 1
 
-test_patterns = ["/tests/*"]
+test_patterns = ["tests/**"]
+
+exclude_patterns = [
+  "setup.py",
+  "tests/**",
+]
 
 [[analyzers]]
 name = "python"
 enabled = true
+dependency_file_paths = "requirements.txt"
 
   [analyzers.meta]
   runtime_version = "3.x.x"
-
-pip install pytest pytest-cov
-pytest --cov=./ --cov-report xml
-curl https://deepsource.io/cli | sh
-export DEEPSOURCE_DSN= ${{secrets.DNS}}
-./bin/deepsource report --analyzer test-coverage --key python --value-file ./coverage.xml
+  max_line_length = 125
