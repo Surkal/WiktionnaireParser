@@ -149,36 +149,6 @@ class WiktionnaireParser:
             parts_of_speech = insert_related_words(parts_of_speech, part, related)
         return parts_of_speech
 
-    def get_examples(self, definition_bloc):
-        """Extract examples."""
-        # TODO: Add the ability to remove sources from examples
-        examples = {}
-        try:
-            example_line = definition_bloc.find('ul').find('li')
-        except AttributeError:
-            return
-
-        count = 0
-        while True:
-            translation = None
-            example = None
-            try:
-                example = example_line.text_content().split('\n')[0].strip()
-                translation = get_translation(example_line)
-                example_line = example_line.getnext()
-            except AttributeError:
-                break
-
-            ex = {}
-            if example:
-                ex['example'] = example
-                if translation:
-                    ex['translation'] = translation
-                examples[count] = ex
-            count += 1
-
-        return examples
-
     def ligne_de_forme(self, line):
         self.pronunciation = []
         self.gender = ''
@@ -207,7 +177,7 @@ class WiktionnaireParser:
             raw = definition_bloc.text_content()
             definition = raw.split('\n')[0]
             # Catching examples
-            examples = self.get_examples(definition_bloc)
+            examples = (definition_bloc)
             subdefinitions[i] = {'subdefinition': definition}
             if examples:
                 subdefinitions[i]['examples'] = examples
@@ -229,7 +199,7 @@ class WiktionnaireParser:
             raw = definition_bloc.text_content()
             definition = raw.split('\n')[0]
             # Catching examples
-            examples = self.get_examples(definition_bloc)
+            examples = get_examples(definition_bloc)
             definitions[i] = {'definition': definition}
             if examples:
                 definitions[i]['examples'] = examples
@@ -266,14 +236,6 @@ class WiktionnaireParser:
                     ids[name] = value
         return ids
 
-    def get_notes(self, section):
-        """Extract the text content of the 'Notes' section."""
-        text = []
-        while section.tag != 'h3' and section.tag != 'h4':
-            text.append(section.text_content())
-            section = section.getnext()
-        return '\n'.join(text)
-
     def get_related_words(self, related_word):
         """
         Get related words.
@@ -291,7 +253,7 @@ class WiktionnaireParser:
 
             section = section.getparent().getnext()
             if 'Notes' in value:
-                related = self.get_notes(section)
+                related = get_notes(section)
             else:
                 related = extract_related_words(section)
             related_words[key] = related
@@ -331,9 +293,50 @@ def insert_related_words(parts_of_speech, part, related):
             parts_of_speech[part] = values
     return parts_of_speech
 
+
 def get_translation(example_line):
     """Get the example translation."""
     # better than a 'split('\n')'
     with suppress(AttributeError):
         translation = example_line.find('dl').find('dd')
         return translation.text_content().strip()
+
+
+def get_examples(definition_bloc):
+    """Extract examples."""
+    # TODO: Add the ability to remove sources from examples
+    examples = {}
+    try:
+        example_line = definition_bloc.find('ul').find('li')
+    except AttributeError:
+        return
+
+    count = 0
+    while True:
+        translation = None
+        example = None
+        try:
+            example = example_line.text_content().split('\n')[0].strip()
+            translation = get_translation(example_line)
+            example_line = example_line.getnext()
+        except AttributeError:
+            break
+
+        ex = {}
+        if example:
+            ex['example'] = example
+            if translation:
+                ex['translation'] = translation
+            examples[count] = ex
+        count += 1
+
+    return examples
+
+
+def get_notes(section):
+    """Extract the text content of the 'Notes' section."""
+    text = []
+    while section.tag != 'h3' and section.tag != 'h4':
+        text.append(section.text_content())
+        section = section.getnext()
+    return '\n'.join(text)
