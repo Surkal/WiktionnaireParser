@@ -54,8 +54,8 @@ class WiktionnaireParser:
     def get_word_data(self):
         """Returns a dictionary of all collected data."""
         return {
-            'title'       : self.get_title(),
-            'etymologies' : self.get_etymology(),
+            'title': self.get_title(),
+            'etymologies': self.get_etymology(),
             'partOfSpeech': self.get_parts_of_speech(),
         }
 
