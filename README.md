@@ -1,4 +1,6 @@
 # WiktionnaireParser
+[![Code Quality](https://www.code-inspector.com/project/14939/score/svg)](https://frontend.code-inspector.com/public/project/14939/WiktionnaireParser/dashboard)
+[![Code Grade](https://www.code-inspector.com/project/14939/status/svg)](https://frontend.code-inspector.com/public/project/14939/WiktionnaireParser/dashboard)
 
 A library for parsing the [french wiktionary](https://fr.wiktionary.org).
 
