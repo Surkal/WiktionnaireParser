@@ -14,6 +14,8 @@ class WiktionnaireParser:
         self._query = pq(html)
         self.sections_id = {}
         self.language = language
+        self.pronunciation = []
+        self.gender = ''
 
     @classmethod
     def from_source(cls, title, language='Français', oldid=None):
