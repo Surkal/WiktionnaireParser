@@ -24,7 +24,6 @@ def filter_sections_id(sections, useless_sections):
 
 def extract_related_words(section):
     related = []
-    url = '/wiki/'
     while section.tag != 'h3' and section.tag != 'h4':
         for link in section.cssselect('a'):
             if 'Annexe:' in link.attrib.get('href'):

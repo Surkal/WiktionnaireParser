@@ -8,3 +8,4 @@ dist/*
 build/*
 coverage.xml
 bin/*
+gh.py
