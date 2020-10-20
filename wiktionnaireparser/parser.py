@@ -297,7 +297,7 @@ def get_examples(definition_bloc):
     try:
         example_line = definition_bloc.find('ul').find('li')
     except AttributeError:
-        return
+        return examples
 
     count = 0
     while True:
@@ -328,6 +328,7 @@ def get_notes(section):
         text.append(section.text_content())
         section = section.getnext()
     return '\n'.join(text)
+
 
 def get_subdefinitions(text):
     """Extraction of sub-definitions, if any."""
