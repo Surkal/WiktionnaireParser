@@ -1,3 +1,6 @@
+"""
+Main module.
+"""
 import re
 from contextlib import suppress
 
@@ -251,21 +254,16 @@ class WiktionnaireParser:
         """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
-        try:
-            lines = section.getnext().find('div').find('div').getnext().find('div')
-            lines = lines.find('div').find('ul').find('li')
-        except AttributeError:
-            return result
+        lines = section.getnext().cssselect('li')
 
-        while lines is not None:
-            language = lines.find('span').text_content()
+        for line in lines:
+            language = line.find('span').text_content()
             transl = []
-            links = lines.find('a')
+            links = line.find('a')
             while links is not None:
                 if links.attrib.get('class') != 'trad-exposant' and links.attrib:
                     transl.append(links.text_content())
                 links = links.getnext()
-            lines = lines.getnext()
             result[language] = transl
         return result
 
