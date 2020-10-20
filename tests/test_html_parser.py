@@ -1,7 +1,14 @@
-import pytest
+from contextlib import contextmanager
 from unittest.mock import patch
 
+import pytest
+
 from wiktionnaireparser import WiktionnaireParser
+
+
+@contextmanager
+def does_not_raise():
+    yield
 
 
 class TestWiktionnaireParser:
@@ -21,9 +28,11 @@ class TestWiktionnaireParser:
         assert self.page.language == 'Français'
 
     def test_language_setter(self):
-        p = WiktionnaireParser(self.page.html, 'anglais')
+        p = WiktionnaireParser(self.page.html, language='anglais')
         assert p.language == 'Anglais'
-        p = WiktionnaireParser(self.page.html, 'Same du Nord')
+        p = WiktionnaireParser(self.page.html, 'en')
+        assert p.language == 'Anglais'
+        p = WiktionnaireParser(self.page.html, language='Same du Nord')
         assert p.language == 'Same du Nord'
 
     @pytest.mark.parametrize(
@@ -53,6 +62,19 @@ class TestWiktionnaireParser:
 
     def test_get_word_data(self):
         assert self.page.get_word_data['etymologies'] == self.page.get_etymology()
+
+    @pytest.mark.parametrize(
+        'lang,name,error',
+        [
+            ('fr', 'Français', does_not_raise()),
+            ('sv', 'Suédois', does_not_raise()),
+            ('azerty', '', pytest.raises(KeyError))
+        ]
+    )
+    def test_class_init_with_lag_code(self, lang, name, error):
+        with error:
+            assert WiktionnaireParser(self.page.html, lang).language == name
+
 
 
 @pytest.mark.parametrize(

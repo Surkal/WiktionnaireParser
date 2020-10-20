@@ -1,4 +1,5 @@
 import re
+import json
 from contextlib import suppress
 
 
@@ -51,3 +52,11 @@ def extract_related_words(section):
         section = section.getnext()
         count += 1
     return related
+
+def get_language_name(lang_code):
+    with open('wiktionnaireparser/languages.json', 'r') as f:
+        languages_json = json.loads(f.read())
+    try:
+        return languages_json[lang_code]
+    except KeyError:
+        raise KeyError('Language code unknown : %s' % lang_code)

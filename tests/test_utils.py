@@ -1,8 +1,15 @@
+from contextlib import contextmanager
+
 import pytest
 
 from wiktionnaireparser.utils import (
-    etymology_cleaner, filter_sections_id
+    etymology_cleaner, filter_sections_id, get_language_name
 )
+
+
+@contextmanager
+def does_not_raise():
+    yield
 
 
 @pytest.mark.parametrize(
@@ -23,3 +30,16 @@ def test_filter_sections_id():
         r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
     )
     assert filter_sections_id(sections, useless) == ['#Nom_commun_1', '#Nom_commun_2_2', '#Verbe_1', '#Verbe_2']
+
+
+@pytest.mark.parametrize(
+    'code,lang,error',
+    [
+        ('fr', 'Français', does_not_raise()),
+        ('sv', 'Suédois', does_not_raise()),
+        ('azerty', '', pytest.raises(KeyError))
+    ]
+)
+def test_get_language_name(code, lang, error):
+    with error:
+        assert get_language_name(code) == lang

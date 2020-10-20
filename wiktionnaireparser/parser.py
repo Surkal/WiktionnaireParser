@@ -1,22 +1,26 @@
-"""
-Main module.
-"""
+"""Main module."""
 import re
 from contextlib import suppress
 
 import requests
 from pyquery import PyQuery as pq
 
-from .utils import etymology_cleaner, filter_sections_id, extract_related_words
+from .utils import (
+    etymology_cleaner, filter_sections_id, extract_related_words,
+    get_language_name,
+)
 
 
 class WiktionnaireParser:
     """Main class to analyze the HTML code of a wiktionary page."""
-    def __init__(self, html, language='Français'):
+    def __init__(self, html, lang_code=None, language='Français'):
         self.html = html
         self._query = pq(html)
         self.sections_id = {}
-        self.language = language
+        if lang_code:
+            self.language = get_language_name(lang_code)
+        else:
+            self.language = language
         self.pronunciation = []
         self.gender = ''
 
@@ -32,15 +36,17 @@ class WiktionnaireParser:
         else:
             url = 'https://fr.wiktionary.org/wiki/%s' % title
         response = requests.get(url)
-        return cls(response.content, language)
+        return cls(response.content, language=language)
 
     @classmethod
-    def random_page(cls, language='Français'):
+    def random_page(cls, lang_code='fr', language='Français'):
         """Get a random page."""
-        # TODO: make it available for more languages
-        url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=fr'
+        if lang_code != 'fr':
+            language = get_language_name(lang_code)
+
+        url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=%s' % lang_code
         response = requests.get(url)
-        return cls(response.content, language)
+        return cls(response.content, language=language)
 
     @property
     def language(self):
