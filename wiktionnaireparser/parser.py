@@ -150,6 +150,7 @@ class WiktionnaireParser:
         return parts_of_speech
 
     def ligne_de_forme(self, line):
+        """Extraction of data on the introductory line of certain sections."""
         self.pronunciation = []
         self.gender = ''
         if line.find('a') is not None:
@@ -171,6 +172,7 @@ class WiktionnaireParser:
         self.pronunciation = list(map(lambda x: x.replace('\\', ''), self.pronunciation))
 
     def get_subdefinitions(self, text):
+        """Extraction of sub-definitions, if any."""
         # TODO: DRY
         subdefinitions = {}
         for i, definition_bloc in enumerate(text.getchildren()):
