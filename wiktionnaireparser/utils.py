@@ -1,4 +1,5 @@
 import re
+from contextlib import suppress
 
 
 def etymology_cleaner(etymology):
@@ -26,11 +27,27 @@ def filter_sections_id(sections, useless_sections):
 
 
 def extract_related_words(section):
-    related = []
+    related = {}
+    count = 0
     while section.tag != 'h3' and section.tag != 'h4':
-        for link in section.cssselect('a'):
-            if 'Annexe:' in link.attrib.get('href'):
-                continue
-            related.append(link.text_content())
+        words = []
+        description = ''
+        if section.cssselect('.NavContent'):
+            with suppress(IndexError):
+                description = section.cssselect('.NavHead')[0].text_content()
+            for link in section.cssselect('.NavContent a'):
+                if 'Annexe:' in link.attrib.get('href'):
+                    continue
+                words.append(link.text_content())
+
+        else:
+            for link in section.cssselect('a'):
+                if 'Annexe:' in link.attrib.get('href'):
+                    continue
+                words.append(link.text_content())
+        related[count] = {}
+        related[count]['description'] = description
+        related[count]['words'] = words
         section = section.getnext()
+        count += 1
     return related
