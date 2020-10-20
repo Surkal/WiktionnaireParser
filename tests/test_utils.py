@@ -6,7 +6,7 @@ from wiktionnaireparser.utils import (
 
 
 @pytest.mark.parametrize(
-    "input,output",
+    "input_,output",
     [
         ('(Siècle à préciser) Composé de maitresse, de et conférence.', 'Composé de maitresse, de et conférence.'),
         ('Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici.', ''),
