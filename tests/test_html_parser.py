@@ -24,6 +24,9 @@ class TestWiktionnaireParser:
             page_ = WiktionnaireParser.from_source('')
             assert page_.html == self.page.html
 
+    def test_get_languages(self):
+        assert self.page.get_languages == ['Français', 'Breton', 'Catalan', 'Espagnol', 'Estonien', 'Finnois', 'Gaikundi', 'Islandais', 'Latin', 'Portugais', 'Same du Nord', 'Suédois']
+
     def test_language_by_default(self):
         assert self.page.language == 'Français'
 
