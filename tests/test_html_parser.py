@@ -79,7 +79,6 @@ class TestWiktionnaireParser:
             assert WiktionnaireParser(self.page.html, lang).language == name
 
 
-
 @pytest.mark.parametrize(
     'title,oldid,part_of_speech,definitions',
     [

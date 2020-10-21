@@ -48,12 +48,13 @@ class WiktionnaireParser:
         response = requests.get(url)
         return cls(response.content, language=language)
 
-    import pysnooper
     @property
-    @pysnooper.snoop()
     def get_languages(self):
         """Get a list of every languages available on the page."""
-        return list(x.text_content() for x in self._query.find('.sectionlangue'))
+        languages = []
+        for section in self._query.find('.sectionlangue'):
+            languages.append(section.text_content())
+        return languages
 
     @property
     def language(self):
