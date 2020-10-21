@@ -55,6 +55,7 @@ class WiktionnaireParser:
 
     @language.setter
     def language(self, language):
+        """Set language."""
         language = language[0].upper() + language[1:]
         self._language = language
         self._find_lang_sections_id()

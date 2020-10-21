@@ -28,6 +28,7 @@ def filter_sections_id(sections, useless_sections):
 
 
 def extract_related_words(section):
+    """Extract related words."""
     related = {}
     count = 0
     while section.tag != 'h3' and section.tag != 'h4':
@@ -54,6 +55,7 @@ def extract_related_words(section):
     return related
 
 def get_language_name(lang_code):
+    """Get language name from languge code."""
     with open('wiktionnaireparser/languages.json', 'r') as f:
         languages_json = json.loads(f.read())
     try:
