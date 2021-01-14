@@ -266,6 +266,7 @@ class WiktionnaireParser:
         return related_words
 
     def get_translations(self, translation_id):
+        # TODO: add translittération support
         """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
@@ -276,8 +277,20 @@ class WiktionnaireParser:
             transl = []
             links = line.find('a')
             while links is not None:
+                '''
+                try:
+                    if links.attrib.get('class').endswith('-Latn'):
+                        links = links.getnext()
+                        continue
+                except AttributeError:
+                    pass
+                '''
                 if links.attrib.get('class') != 'trad-exposant' and links.attrib:
-                    transl.append(links.text_content())
+                    if links.attrib.get('class') is None:
+                        transl.append(links.text_content())
+                    # Ignore translittérations
+                    elif not links.attrib.get('class').endswith('-Latn'):
+                        transl.append(links.text_content())
                 links = links.getnext()
             result[language] = transl
         return result
