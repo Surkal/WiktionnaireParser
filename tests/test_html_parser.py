@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from wiktionnaireparser import WiktionnaireParser
+from ..wiktionnaireparser.parser import WiktionnaireParser
 
 
 @contextmanager
