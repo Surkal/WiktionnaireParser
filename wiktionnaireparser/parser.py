@@ -274,26 +274,28 @@ class WiktionnaireParser:
         lines = section.getnext().cssselect('li')
 
         for line in lines:
-            language = line.find('span').text_content()
-            transl = []
-            links = line.find('a')
-            while links is not None:
-                '''
-                try:
-                    if links.attrib.get('class').endswith('-Latn'):
-                        links = links.getnext()
-                        continue
-                except AttributeError:
-                    pass
-                '''
-                if links.attrib.get('class') != 'trad-exposant' and links.attrib:
-                    if links.attrib.get('class') is None:
-                        transl.append(links.text_content())
-                    # Ignore translittérations
-                    elif not links.attrib.get('class').endswith('-Latn'):
-                        transl.append(links.text_content())
-                links = links.getnext()
-            result[language] = transl
+            language = line.find('span')
+            if language is not None:
+                language = language.text_content()
+                transl = []
+                links = line.find('a')
+                while links is not None:
+                    '''
+                    try:
+                        if links.attrib.get('class').endswith('-Latn'):
+                            links = links.getnext()
+                            continue
+                    except AttributeError:
+                        pass
+                    '''
+                    if links.attrib.get('class') != 'trad-exposant' and links.attrib:
+                        if links.attrib.get('class') is None:
+                            transl.append(links.text_content())
+                        # Ignore translittérations
+                        elif not links.attrib.get('class').endswith('-Latn'):
+                            transl.append(links.text_content())
+                    links = links.getnext()
+                result[language] = transl
         return result
 
 
