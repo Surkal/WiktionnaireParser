@@ -1,6 +1,7 @@
 import re
 import json
 from contextlib import suppress
+from lxml.html import HtmlComment
 
 
 def etymology_cleaner(etymology):
@@ -31,25 +32,26 @@ def extract_related_words(section):
     """Extract related words."""
     related = {}
     count = 0
-    while section.tag != 'h3' and section.tag != 'h4':
+    while section is not None and section.tag != 'h3' and section.tag != 'h4':
         words = []
         description = ''
-        if section.cssselect('.NavContent'):
-            with suppress(IndexError):
-                description = section.cssselect('.NavHead')[0].text_content()
-            for link in section.cssselect('.NavContent a'):
-                if 'Annexe:' in link.attrib.get('href'):
-                    continue
-                words.append(link.text_content())
+        if not type(section) is HtmlComment:
+            if section.cssselect('.NavContent'):
+                with suppress(IndexError):
+                    description = section.cssselect('.NavHead')[0].text_content()
+                for link in section.cssselect('.NavContent a'):
+                    if 'Annexe:' in link.attrib.get('href'):
+                        continue
+                    words.append(link.text_content())
 
-        else:
-            for link in section.cssselect('a'):
-                if 'Annexe:' in link.attrib.get('href'):
-                    continue
-                words.append(link.text_content())
-        related[count] = {}
-        related[count]['description'] = description
-        related[count]['words'] = words
+            else:
+                for link in section.cssselect('a'):
+                    if 'Annexe:' in link.attrib.get('href'):
+                        continue
+                    words.append(link.text_content())
+            related[count] = {}
+            related[count]['description'] = description
+            related[count]['words'] = words
         section = section.getnext()
         count += 1
     return related
