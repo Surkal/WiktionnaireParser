@@ -196,22 +196,23 @@ class WiktionnaireParser:
             part_of_speech = '#' + part_of_speech.replace(' ', '_')
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
-        while text.tag != 'ol':
+        while text is not None and text.tag != 'ol':
             # ligne de forme
             if text.tag == 'p' or text.tag == 'span':
                 self.ligne_de_forme(text)
             text = text.getnext()
-        for i, definition_bloc in enumerate(text.getchildren()):
-            raw = definition_bloc.text_content()
-            definition = raw.split('\n')[0]
-            # Catching examples
-            examples = get_examples(definition_bloc)
-            definitions[i] = {'definition': definition}
-            if examples:
-                definitions[i]['examples'] = examples
-            if definition_bloc.find('ol'):
-                subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
-                definitions[i]['subdefinitions'] = subdefinitions
+        if text is not None:
+            for i, definition_bloc in enumerate(text.getchildren()):
+                raw = definition_bloc.text_content()
+                definition = raw.split('\n')[0]
+                # Catching examples
+                examples = get_examples(definition_bloc)
+                definitions[i] = {'definition': definition}
+                if examples:
+                    definitions[i]['examples'] = examples
+                if definition_bloc.find('ol'):
+                    subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
+                    definitions[i]['subdefinitions'] = subdefinitions
         return definitions
 
     def get_etymology(self):
