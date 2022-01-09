@@ -99,7 +99,7 @@ class WiktionnaireParser:
         self.sections_id = {}
         for section in lang.getnext().getchildren():  # 'li'
             section_id = section.find('a').attrib['href']
-            if not "*" in section_id:
+            if not "*" in section_id and not "_" in section_id:
                 # Subsections?
                 if section.find('ul') is None:
                     self.sections_id[section_id] = []
@@ -134,7 +134,7 @@ class WiktionnaireParser:
         parts_of_speech = {}
         useless_sections = (
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
-            r'Anagrammes', r'Liens_externes', r'Erreurs*',
+            r'Anagrammes', r'Liens_externes', r'Erreurs*', r'=_Synonymes'
         )
         sections = filter_sections_id(self.sections_id.keys(), useless_sections)
         for section_name in sections:
