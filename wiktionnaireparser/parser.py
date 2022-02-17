@@ -209,7 +209,7 @@ class WiktionnaireParser:
             definitions[i] = {'definition': definition}
             if examples:
                 definitions[i]['examples'] = examples
-            if definition_bloc.find('ol'):
+            if definition_bloc.find('ol') is not None:
                 subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
                 definitions[i]['subdefinitions'] = subdefinitions
         return definitions
@@ -270,29 +270,17 @@ class WiktionnaireParser:
         """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
+        # getting translations by language
         lines = section.getnext().cssselect('li')
 
         for line in lines:
+            translations = []
             language = line.find('span').text_content()
-            transl = []
-            links = line.find('a')
-            while links is not None:
-                '''
-                try:
-                    if links.attrib.get('class').endswith('-Latn'):
-                        links = links.getnext()
-                        continue
-                except AttributeError:
-                    pass
-                '''
-                if links.attrib.get('class') != 'trad-exposant' and links.attrib:
-                    if links.attrib.get('class') is None:
-                        transl.append(links.text_content())
-                    # Ignore translittérations
-                    elif not links.attrib.get('class').endswith('-Latn'):
-                        transl.append(links.text_content())
-                links = links.getnext()
-            result[language] = transl
+            links = line.cssselect('bdi a')
+
+            for link in links:
+                translations.append(link.text_content())
+            result[language] = translations
         return result
 
 
@@ -366,6 +354,6 @@ def get_subdefinitions(text):
         # Catching examples
         examples = (definition_bloc)
         subdefinitions[i] = {'subdefinition': definition}
-        if examples:
+        if len(examples):
             subdefinitions[i]['examples'] = examples
     return subdefinitions

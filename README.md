@@ -58,7 +58,7 @@ Use `get_word_data` to extract and display all data
             },
             'translations': {
                 'Allemand': ['Englischsprachige'],
-                'Anglais': ['English-speaker', 'anglophone'],
+                'Anglais': ['anglophone'],
                 'Breton': ['saozneger'],
                 'Catalan': ['anglòfon', 'anglòfona', 'angloparlant'],
                 'Espagnol': ['anglófono', 'anglófona', 'anglohablante'],
