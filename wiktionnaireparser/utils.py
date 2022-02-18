@@ -9,8 +9,9 @@ def etymology_cleaner(etymology):
     site visitors to contribute.
     """
     ignore_etym = [
-        r'^Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici\.$',
-        r'\(Siècle à préciser\) ',
+        r"^Étymologie manquante ou incomplète. Si vous la " +
+        r"connaissez, vous pouvez l’ajouter en cliquant ici\.$",
+        r'\(Siècle à préciser\)\s*',
     ]
     for ignore in ignore_etym:
         etymology = re.sub(ignore, '', etymology)

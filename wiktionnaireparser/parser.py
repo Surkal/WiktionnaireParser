@@ -13,6 +13,7 @@ from .utils import (
 
 class WiktionnaireParser:
     """Main class to analyze the HTML code of a wiktionary page."""
+
     def __init__(self, html, lang_code=None, language='Français'):
         self.html = html
         self._query = pq(html)
@@ -25,16 +26,13 @@ class WiktionnaireParser:
         self.gender = ''
 
     @classmethod
-    def from_source(cls, title, language='Français', oldid=None):
+    def from_source(cls, title, language='Français', oldid=''):
         """
         Get a page by its title.
         Possibly an old version of the title you are looking for
         by entering its `oldid`.
         """
-        if oldid:
-            url = 'https://fr.wiktionary.org/w/index.php?title=%s&oldid=%s' % (title, str(oldid))
-        else:
-            url = 'https://fr.wiktionary.org/wiki/%s' % title
+        url = f'https://fr.wiktionary.org/w/index.php?title={title}&oldid={oldid}'
         response = requests.get(url)
         return cls(response.content, language=language)
 
@@ -169,16 +167,16 @@ class WiktionnaireParser:
 
     def ligne_de_forme(self, line):
         """Extraction of data on the introductory line of certain sections."""
-        self.pronunciation = []
+        pronunciations = []
         self.gender = ''
         if line.find('a') is not None:
             line_ = line.find('a')
             while line_ is not None:
                 with suppress(AttributeError):
                     if line_.find('span').attrib.get('class') == 'API':
-                        self.pronunciation.append(line_.text_content())
+                        pronunciations.append(line_.text_content())
                 line_ = line_.getnext()
-        # TODO: DRY
+        
         if line.find('span') is not None:
             line_ = line.find('span')
             while line_ is not None:
@@ -187,7 +185,7 @@ class WiktionnaireParser:
                     break
                 line_ = line_.getnext()
 
-        self.pronunciation = list(map(lambda x: x.replace('\\', ''), self.pronunciation))
+        self.pronunciation = list(map(lambda x: x.replace('\\', ''), pronunciations))
 
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
@@ -219,7 +217,8 @@ class WiktionnaireParser:
         Get the etymology of the word. On the French wiktionary,
         there is only one 'etymology' section per language.
         """
-        id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id.keys()))
+        section_names = self.sections_id.keys()
+        id_ = list(filter(lambda x: re.search(r"Étymologie", x), section_names))
 
         # If there is no etymology section, give up
         if not id_:
