@@ -32,7 +32,7 @@ def extract_related_words(section):
     """Extract related words."""
     related = {}
     count = 0
-    while section.tag != 'h3' and section.tag != 'h4':
+    while section.tag not in ('h3', 'h4'):
         words = []
         description = ''
         if section.cssselect('.NavContent'):

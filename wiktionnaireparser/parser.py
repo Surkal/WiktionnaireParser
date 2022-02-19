@@ -196,7 +196,7 @@ class WiktionnaireParser:
         text = text.getparent()
         while text.tag != 'ol':
             # ligne de forme
-            if text.tag == 'p' or text.tag == 'span':
+            if text.tag in ('p', 'span'):
                 self.ligne_de_forme(text)
             text = text.getnext()
         for i, definition_bloc in enumerate(text.getchildren()):
@@ -337,7 +337,7 @@ def get_examples(definition_bloc):
 def get_notes(section):
     """Extract the text content of the 'Notes' section."""
     text = []
-    while section.tag != 'h3' and section.tag != 'h4':
+    while section.tag not in ('h3', 'h4'):
         text.append(section.text_content())
         section = section.getnext()
     return '\n'.join(text)
