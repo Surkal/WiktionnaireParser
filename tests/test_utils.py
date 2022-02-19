@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from wiktionnaireparser.utils import (
+from ..wiktionnaireparser.utils import (
     etymology_cleaner, filter_sections_id, get_language_name
 )
 

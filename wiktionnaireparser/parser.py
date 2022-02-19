@@ -13,6 +13,7 @@ from .utils import (
 
 class WiktionnaireParser:
     """Main class to analyze the HTML code of a wiktionary page."""
+
     def __init__(self, html, lang_code=None, language='Français'):
         self.html = html
         self._query = pq(html)
@@ -25,16 +26,13 @@ class WiktionnaireParser:
         self.gender = ''
 
     @classmethod
-    def from_source(cls, title, language='Français', oldid=None):
+    def from_source(cls, title, language='Français', oldid=''):
         """
         Get a page by its title.
         Possibly an old version of the title you are looking for
         by entering its `oldid`.
         """
-        if oldid:
-            url = 'https://fr.wiktionary.org/w/index.php?title=%s&oldid=%s' % (title, str(oldid))
-        else:
-            url = 'https://fr.wiktionary.org/wiki/%s' % title
+        url = f'https://fr.wiktionary.org/w/index.php?title={title}&oldid={oldid}'
         response = requests.get(url)
         return cls(response.content, language=language)
 
@@ -44,7 +42,7 @@ class WiktionnaireParser:
         if lang_code != 'fr':
             language = get_language_name(lang_code)
 
-        url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=%s' % lang_code
+        url = f'http://tools.wmflabs.org/anagrimes/hasard.php?langue={lang_code}'
         response = requests.get(url)
         return cls(response.content, language=language)
 
@@ -85,8 +83,9 @@ class WiktionnaireParser:
 
         # Find in summary
         for link in self._query.find('a'):
+            language_slug = self._language.replace(' ', '_')
             try:
-                if link.attrib['href'] == '#%s' % (self._language.replace(' ', '_')):
+                if link.attrib['href'] == f'#{language_slug}':
                     lang = link
                     break
             except KeyError:
@@ -169,16 +168,16 @@ class WiktionnaireParser:
 
     def ligne_de_forme(self, line):
         """Extraction of data on the introductory line of certain sections."""
-        self.pronunciation = []
+        pronunciations = []
         self.gender = ''
         if line.find('a') is not None:
             line_ = line.find('a')
             while line_ is not None:
                 with suppress(AttributeError):
                     if line_.find('span').attrib.get('class') == 'API':
-                        self.pronunciation.append(line_.text_content())
+                        pronunciations.append(line_.text_content())
                 line_ = line_.getnext()
-        # TODO: DRY
+
         if line.find('span') is not None:
             line_ = line.find('span')
             while line_ is not None:
@@ -187,7 +186,7 @@ class WiktionnaireParser:
                     break
                 line_ = line_.getnext()
 
-        self.pronunciation = list(map(lambda x: x.replace('\\', ''), self.pronunciation))
+        self.pronunciation = list(map(lambda x: x.replace('\\', ''), pronunciations))
 
     def get_definitions(self, part_of_speech):
         """Get the definitions of the word."""
@@ -198,7 +197,7 @@ class WiktionnaireParser:
         text = text.getparent()
         while text.tag != 'ol':
             # ligne de forme
-            if text.tag == 'p' or text.tag == 'span':
+            if text.tag in ('p', 'span'):
                 self.ligne_de_forme(text)
             text = text.getnext()
         for i, definition_bloc in enumerate(text.getchildren()):
@@ -209,7 +208,7 @@ class WiktionnaireParser:
             definitions[i] = {'definition': definition}
             if examples:
                 definitions[i]['examples'] = examples
-            if definition_bloc.find('ol'):
+            if definition_bloc.find('ol') is not None:
                 subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
                 definitions[i]['subdefinitions'] = subdefinitions
         return definitions
@@ -219,7 +218,8 @@ class WiktionnaireParser:
         Get the etymology of the word. On the French wiktionary,
         there is only one 'etymology' section per language.
         """
-        id_ = list(filter(lambda x: re.search(r"Étymologie", x), self.sections_id.keys()))
+        section_names = self.sections_id.keys()
+        id_ = list(filter(lambda x: re.search(r"Étymologie", x), section_names))
 
         # If there is no etymology section, give up
         if not id_:
@@ -233,7 +233,7 @@ class WiktionnaireParser:
 
     def _related_words_ids(self, related_word):
         related_word = related_word.replace(' ', '_')
-        regex = r'#%s(?:_\d+)?' % related_word
+        regex = fr'#{related_word}(?:_\d+)?'
         ids = {}
         for key, values in self.sections_id.items():
             name = self._query.find(key).text()
@@ -270,29 +270,17 @@ class WiktionnaireParser:
         """Get translations."""
         result = {}
         section = self._query.find(translation_id)[0].getparent()
+        # getting translations by language
         lines = section.getnext().cssselect('li')
 
         for line in lines:
+            translations = []
             language = line.find('span').text_content()
-            transl = []
-            links = line.find('a')
-            while links is not None:
-                '''
-                try:
-                    if links.attrib.get('class').endswith('-Latn'):
-                        links = links.getnext()
-                        continue
-                except AttributeError:
-                    pass
-                '''
-                if links.attrib.get('class') != 'trad-exposant' and links.attrib:
-                    if links.attrib.get('class') is None:
-                        transl.append(links.text_content())
-                    # Ignore translittérations
-                    elif not links.attrib.get('class').endswith('-Latn'):
-                        transl.append(links.text_content())
-                links = links.getnext()
-            result[language] = transl
+            links = line.cssselect('bdi a')
+
+            for link in links:
+                translations.append(link.text_content())
+            result[language] = translations
         return result
 
 
@@ -350,7 +338,7 @@ def get_examples(definition_bloc):
 def get_notes(section):
     """Extract the text content of the 'Notes' section."""
     text = []
-    while section.tag != 'h3' and section.tag != 'h4':
+    while section.tag not in ('h3', 'h4'):
         text.append(section.text_content())
         section = section.getnext()
     return '\n'.join(text)
@@ -366,6 +354,6 @@ def get_subdefinitions(text):
         # Catching examples
         examples = (definition_bloc)
         subdefinitions[i] = {'subdefinition': definition}
-        if examples:
+        if len(examples):
             subdefinitions[i]['examples'] = examples
     return subdefinitions
