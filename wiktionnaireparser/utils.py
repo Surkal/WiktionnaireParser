@@ -1,3 +1,5 @@
+"""Set of useful functions"""
+
 import re
 import json
 from contextlib import suppress
@@ -58,9 +60,9 @@ def extract_related_words(section):
 
 def get_language_name(lang_code):
     """Get language name from languge code."""
-    with open('wiktionnaireparser/languages.json', 'r') as f:
-        languages_json = json.loads(f.read())
+    with open('wiktionnaireparser/languages.json', 'r', encoding='UTF-8') as json_file:
+        languages_json = json.loads(json_file.read())
     try:
         return languages_json[lang_code]
-    except KeyError:
-        raise KeyError('Language code unknown : %s' % lang_code)
+    except KeyError as error:
+        raise KeyError(f'Language code unknown : {lang_code}') from error
