@@ -55,6 +55,7 @@ def extract_related_words(section):
         count += 1
     return related
 
+
 def get_language_name(lang_code):
     """Get language name from languge code."""
     with open('wiktionnaireparser/languages.json', 'r') as f:
