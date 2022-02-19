@@ -98,14 +98,15 @@ class WiktionnaireParser:
         self.sections_id = {}
         for section in lang.getnext().getchildren():  # 'li'
             section_id = section.find('a').attrib['href']
-            # Subsections?
-            if section.find('ul') is None:
-                self.sections_id[section_id] = []
-                continue
-            subsections = []
-            for subsection in section.find('ul'):
-                subsections.append(subsection.find('a').attrib['href'])
-            self.sections_id[section_id] = subsections
+            if not "*" in section_id and not "_" in section_id:
+                # Subsections?
+                if section.find('ul') is None:
+                    self.sections_id[section_id] = []
+                    continue
+                subsections = []
+                for subsection in section.find('ul'):
+                    subsections.append(subsection.find('a').attrib['href'])
+                self.sections_id[section_id] = subsections
 
         return self.sections_id
 
@@ -132,7 +133,7 @@ class WiktionnaireParser:
         parts_of_speech = {}
         useless_sections = (
             r'Étymologie', r'Prononciation', r'Références', r'Voir_aussi',
-            r'Anagrammes', r'Liens_externes'
+            r'Anagrammes', r'Liens_externes', r'Erreurs*', r'=_Synonymes'
         )
         sections = filter_sections_id(self.sections_id.keys(), useless_sections)
         for section_name in sections:
@@ -195,22 +196,23 @@ class WiktionnaireParser:
             part_of_speech = '#' + part_of_speech.replace(' ', '_')
         text = self._query.find(part_of_speech)[0]
         text = text.getparent()
-        while text.tag != 'ol':
+        while text is not None and text.tag != 'ol':
             # ligne de forme
             if text.tag in ('p', 'span'):
                 self.ligne_de_forme(text)
             text = text.getnext()
-        for i, definition_bloc in enumerate(text.getchildren()):
-            raw = definition_bloc.text_content()
-            definition = raw.split('\n')[0]
-            # Catching examples
-            examples = get_examples(definition_bloc)
-            definitions[i] = {'definition': definition}
-            if examples:
-                definitions[i]['examples'] = examples
-            if definition_bloc.find('ol') is not None:
-                subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
-                definitions[i]['subdefinitions'] = subdefinitions
+        if text is not None:
+            for i, definition_bloc in enumerate(text.getchildren()):
+                raw = definition_bloc.text_content()
+                definition = raw.split('\n')[0]
+                # Catching examples
+                examples = get_examples(definition_bloc)
+                definitions[i] = {'definition': definition}
+                if examples:
+                    definitions[i]['examples'] = examples
+                if definition_bloc.find('ol') is not None:
+                    subdefinitions = get_subdefinitions(definition_bloc.find('ol'))
+                    definitions[i]['subdefinitions'] = subdefinitions
         return definitions
 
     def get_etymology(self):
@@ -274,11 +276,12 @@ class WiktionnaireParser:
         lines = section.getnext().cssselect('li')
 
         for line in lines:
+            language = line.find('span')
             translations = []
-            language = line.find('span').text_content()
-            links = line.cssselect('bdi a')
-
-            for link in links:
+            if language is not None:
+                language = language.text_content()
+                links = line.cssselect('bdi a')
+                for link in links:
                 translations.append(link.text_content())
             result[language] = translations
         return result
