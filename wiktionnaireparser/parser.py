@@ -176,7 +176,7 @@ class WiktionnaireParser:
                     if line_.find('span').attrib.get('class') == 'API':
                         pronunciations.append(line_.text_content())
                 line_ = line_.getnext()
-        
+
         if line.find('span') is not None:
             line_ = line.find('span')
             while line_ is not None:
