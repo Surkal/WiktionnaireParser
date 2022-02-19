@@ -42,7 +42,7 @@ class WiktionnaireParser:
         if lang_code != 'fr':
             language = get_language_name(lang_code)
 
-        url = 'http://tools.wmflabs.org/anagrimes/hasard.php?langue=%s' % lang_code
+        url = f'http://tools.wmflabs.org/anagrimes/hasard.php?langue={lang_code}'
         response = requests.get(url)
         return cls(response.content, language=language)
 
@@ -83,8 +83,9 @@ class WiktionnaireParser:
 
         # Find in summary
         for link in self._query.find('a'):
+            language_slug = self._language.replace(' ', '_')
             try:
-                if link.attrib['href'] == '#%s' % (self._language.replace(' ', '_')):
+                if link.attrib['href'] == f'#{language_slug}':
                     lang = link
                     break
             except KeyError:
@@ -232,7 +233,7 @@ class WiktionnaireParser:
 
     def _related_words_ids(self, related_word):
         related_word = related_word.replace(' ', '_')
-        regex = r'#%s(?:_\d+)?' % related_word
+        regex = fr'#{related_word}(?:_\d+)?'
         ids = {}
         for key, values in self.sections_id.items():
             name = self._query.find(key).text()
