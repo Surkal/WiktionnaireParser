@@ -9,3 +9,5 @@ build/*
 coverage.xml
 bin/*
 gh.py
+Dockerfile
+debug/*

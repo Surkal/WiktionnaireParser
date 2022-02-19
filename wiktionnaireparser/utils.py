@@ -1,3 +1,5 @@
+"""Set of useful functions"""
+
 import re
 import json
 from contextlib import suppress
@@ -10,8 +12,9 @@ def etymology_cleaner(etymology):
     site visitors to contribute.
     """
     ignore_etym = [
-        r'^Étymologie manquante ou incomplète. Si vous la connaissez, vous pouvez l’ajouter en cliquant ici\.$',
-        r'\(Siècle à préciser\) ',
+        r"^Étymologie manquante ou incomplète. Si vous la " +
+        r"connaissez, vous pouvez l’ajouter en cliquant ici\.$",
+        r'\(Siècle à préciser\)\s*',
     ]
     for ignore in ignore_etym:
         etymology = re.sub(ignore, '', etymology)
@@ -32,7 +35,7 @@ def extract_related_words(section):
     """Extract related words."""
     related = {}
     count = 0
-    while section is not None and section.tag != 'h3' and section.tag != 'h4':
+    while section is not None and section.tag not in ('h3', 'h4'):
         words = []
         description = ''
         if not type(section) is HtmlComment:
@@ -56,11 +59,12 @@ def extract_related_words(section):
         count += 1
     return related
 
+
 def get_language_name(lang_code):
     """Get language name from languge code."""
-    with open('wiktionnaireparser/languages.json', 'r') as f:
-        languages_json = json.loads(f.read())
+    with open('wiktionnaireparser/languages.json', 'r', encoding='UTF-8') as json_file:
+        languages_json = json.loads(json_file.read())
     try:
         return languages_json[lang_code]
-    except KeyError:
-        raise KeyError('Language code unknown : %s' % lang_code)
+    except KeyError as error:
+        raise KeyError(f'Language code unknown : {lang_code}') from error
