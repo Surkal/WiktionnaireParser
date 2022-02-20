@@ -3,6 +3,7 @@
 import re
 import json
 from contextlib import suppress
+
 from lxml.html import HtmlComment
 
 
@@ -38,7 +39,7 @@ def extract_related_words(section):
     while section is not None and section.tag not in ('h3', 'h4'):
         words = []
         description = ''
-        if not type(section) is HtmlComment:
+        if not isinstance(section, HtmlComment):
             if section.cssselect('.NavContent'):
                 with suppress(IndexError):
                     description = section.cssselect('.NavHead')[0].text_content()
